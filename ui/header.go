@@ -17,7 +17,7 @@ func InitHeader() *Header {
 		Width(applicationWidth)
 
 	return &Header{
-		content: "\U0001f345 Chillku Timer\n",
+		content: "\U0001f345 Pimpomodoro Timer\n",
 		style:   s,
 	}
 }

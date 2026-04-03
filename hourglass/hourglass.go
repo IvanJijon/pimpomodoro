@@ -53,5 +53,5 @@ func (h *Hourglass) RemainingTime() time.Duration {
 
 // Expired returns whether the hourglass time capacity was totally consumed
 func (h *Hourglass) Expired() bool {
-	return h.remainingTime <= 0
+	return h.RemainingTime() <= 0
 }

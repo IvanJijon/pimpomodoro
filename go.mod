@@ -1,4 +1,4 @@
-module github.com/IvanJijon/chillku
+module github.com/IvanJijon/pimpomodoro
 
 go 1.19
 
