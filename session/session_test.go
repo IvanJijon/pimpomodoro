@@ -114,3 +114,40 @@ func TestNextPhase(t *testing.T) {
 		})
 	}
 }
+
+func TestPhaseDuration(t *testing.T) {
+	tests := []struct {
+		name         string
+		phase        Phase
+		wantDuration time.Duration
+	}{
+		{
+			name:         "returns work duration when phase is Work",
+			phase:        Work,
+			wantDuration: 25 * time.Minute,
+		},
+		{
+			name:         "returns short break duration when phase is ShortBreak",
+			phase:        ShortBreak,
+			wantDuration: 5 * time.Minute,
+		},
+		{
+			name:         "returns long break duration when phase is LongBreak",
+			phase:        LongBreak,
+			wantDuration: 15 * time.Minute,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := NewSession()
+			s.CurrentPhase = tt.phase
+
+			got := s.PhaseDuration()
+
+			if got != tt.wantDuration {
+				t.Errorf("PhaseDuration() = %v, want %v", got, tt.wantDuration)
+			}
+		})
+	}
+}

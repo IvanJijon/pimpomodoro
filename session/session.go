@@ -31,6 +31,7 @@ func NewSession() Session {
 	}
 }
 
+// NextPhase advances the session to the next phase in the Pomodoro cycle.
 func (s *Session) NextPhase() {
 	switch s.CurrentPhase {
 	case Idle:
@@ -47,5 +48,17 @@ func (s *Session) NextPhase() {
 	case LongBreak:
 		s.CurrentPhase = Work
 		s.CurrentPomodoro = 1
+	}
+}
+
+// PhaseDuration returns the duration of the current phase.
+func (s *Session) PhaseDuration() time.Duration {
+	switch s.CurrentPhase {
+	case ShortBreak:
+		return s.ShortBreakDuration
+	case LongBreak:
+		return s.LongBreakDuration
+	default:
+		return s.WorkDuration
 	}
 }
