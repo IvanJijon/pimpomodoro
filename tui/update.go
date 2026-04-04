@@ -53,6 +53,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.updateQuitConfirm(msg)
 		case ModeSkipConfirm:
 			return m.updateSkipConfirm(msg)
+		case ModeResetConfirm:
+			return m.updateResetConfirm(msg)
 		case ModeHelp:
 			return m.updateHelp(msg)
 		default:
@@ -85,7 +87,7 @@ func (m Model) updateNormal(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.running = false
 		return m, nil
 	case "r":
-		m.remainingTime = m.session.PhaseDuration()
+		m.viewMode = ModeResetConfirm
 		m.running = false
 		return m, nil
 	case "n":
@@ -144,6 +146,21 @@ func (m Model) updateSkipConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 func (m Model) updateHelp(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if msg.String() == "?" {
 		m.viewMode = ModeNormal
+	}
+	return m, nil
+}
+
+func (m Model) updateResetConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "y":
+		m.remainingTime = m.session.PhaseDuration()
+		m.viewMode = ModeNormal
+		return m, nil
+	case "x":
+		m.viewMode = ModeNormal
+		m.running = true
+		m.tickID++
+		return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
 	}
 	return m, nil
 }

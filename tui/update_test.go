@@ -171,7 +171,7 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantRunning:       false,
 		},
 		{
-			name: "pressing r resets current phase timer",
+			name: "pressing r shows reset confirmation",
 			setup: func(m *Model) {
 				m.session.CurrentPhase = session.Work
 				m.remainingTime = 12 * time.Minute
@@ -179,8 +179,35 @@ func TestUpdateKeyMsg(t *testing.T) {
 			},
 			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'r'}},
 			wantPhase:         session.Work,
+			wantRemainingTime: 12 * time.Minute,
+			wantRunning:       false,
+			wantViewMode:      ModeResetConfirm,
+		},
+		{
+			name: "pressing y during reset confirmation resets timer",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 12 * time.Minute
+				m.viewMode = ModeResetConfirm
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'y'}},
+			wantPhase:         session.Work,
 			wantRemainingTime: 25 * time.Minute,
 			wantRunning:       false,
+			wantViewMode:      ModeNormal,
+		},
+		{
+			name: "pressing x during reset confirmation cancels and resumes",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 12 * time.Minute
+				m.viewMode = ModeResetConfirm
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}},
+			wantPhase:         session.Work,
+			wantRemainingTime: 12 * time.Minute,
+			wantRunning:       true,
+			wantViewMode:      ModeNormal,
 		},
 		{
 			name: "pressing n shows skip confirmation",
