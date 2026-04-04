@@ -13,16 +13,24 @@ import (
 )
 
 var (
+	version = "dev"
+
 	work     = flag.Int("work", 25, "work duration in minutes")
 	brk      = flag.Int("break", 5, "short break duration in minutes")
 	longBrk  = flag.Int("long-break", 15, "long break duration in minutes")
 	rounds   = flag.Int("rounds", 4, "number of pomodoros before long break")
 	noSound  = flag.Bool("no-sound", false, "disable alarm sound")
 	noNotify = flag.Bool("no-notify", false, "disable desktop notifications")
+	showVer  = flag.Bool("version", false, "print version and exit")
 )
 
 func main() {
 	flag.Parse()
+
+	if *showVer {
+		fmt.Printf("pimpom v%s\n", version)
+		return
+	}
 
 	p := tea.NewProgram(tui.NewModel(parseConfig(), parseCallbacks()), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
