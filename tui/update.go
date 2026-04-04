@@ -47,6 +47,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, tickCmd(m.tickID)
 	case tea.KeyMsg:
 		switch m.viewMode {
+		case ModeNormal:
+			return m.updateNormal(msg)
 		case ModeQuitConfirm:
 			return m.updateQuitConfirm(msg)
 		case ModeSkipConfirm:
@@ -54,7 +56,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case ModeHelp:
 			return m.updateHelp(msg)
 		default:
-			return m.updateNormal(msg)
+			return m, nil
 		}
 	}
 	return m, nil
@@ -140,10 +142,8 @@ func (m Model) updateSkipConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) updateHelp(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
-	switch msg.String() {
-	case "?":
+	if msg.String() == "?" {
 		m.viewMode = ModeNormal
 	}
 	return m, nil
 }
-

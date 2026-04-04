@@ -58,21 +58,27 @@ func (m Model) View() string {
 	}
 
 	s += "\n" + centerStyle.Render(phaseLabel(m)) + "\n"
-	if m.running {
+	switch {
+	case m.running:
 		s += "\n" + centerStyle.Render(strings.TrimRight(m.spinner.View(), " ")+phaseTimerStyle(m).Render(formatDuration(m.remainingTime))) + "\n"
-	} else if m.session.CurrentPhase != session.Idle {
+	case m.session.CurrentPhase != session.Idle:
 		s += "\n" + centerStyle.Render(pausedStyle.Render("\u23f8 "+formatDuration(m.remainingTime))) + "\n"
-	} else {
+	default:
 		s += "\n" + centerStyle.Render(timerTextStyle.Render(formatDuration(m.remainingTime))) + "\n"
 	}
 
-	if m.viewMode == ModeSkipConfirm {
+	switch m.viewMode {
+	case ModeSkipConfirm:
 		dialog := dialogStyle.Render("Skip to next phase?\n\n(y) confirm  (x) cancel")
 		s += "\n" + centerStyle.Render(dialog) + "\n"
-	} else if m.viewMode == ModeQuitConfirm {
+	case ModeQuitConfirm:
 		dialog := dialogStyle.Render("Quit?\n\n(y) confirm  (x) cancel")
 		s += "\n" + centerStyle.Render(dialog) + "\n"
-	} else {
+	case ModeNormal:
+		s += "\n" + footerStyle.Render("(?) help  (q) quit") + "\n"
+	case ModeHelp:
+		// ModeHelp is handled at the top of the View function, so nothing needed here.
+	default:
 		s += "\n" + footerStyle.Render("(?) help  (q) quit") + "\n"
 	}
 
@@ -95,6 +101,8 @@ func phaseLabel(m Model) string {
 		return style.Render("Short Break")
 	case session.LongBreak:
 		return style.Render("Long Break")
+	case session.Idle:
+		return style.Render("Idle")
 	default:
 		return style.Render("Idle")
 	}
@@ -106,8 +114,12 @@ func phaseColor(m Model) lipgloss.Color {
 		return bordeaux
 	case session.LongBreak:
 		return deepBlue
-	default:
+	case session.ShortBreak:
 		return turquoise
+	case session.Idle:
+		return gray
+	default:
+		return gray
 	}
 }
 
@@ -123,6 +135,8 @@ func phaseCompleteMessage(phase session.Phase) string {
 		return "Short break is over! Back to work."
 	case session.LongBreak:
 		return "Long break is over! Ready for a new cycle."
+	case session.Idle:
+		return "Timer is idle."
 	default:
 		return "Time's up!"
 	}
