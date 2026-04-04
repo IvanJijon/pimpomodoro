@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/IvanJijon/pimpomodoro/app"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/IvanJijon/pimpomodoro/tui"
 )
 
 func main() {
-	p := tea.NewProgram(app.InitialModel())
+	p := tea.NewProgram(tui.NewModel())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Oops! There's been an error: %v", err)
 		os.Exit(1)
