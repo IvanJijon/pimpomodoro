@@ -28,7 +28,7 @@ func main() {
 	flag.Parse()
 
 	if *showVer {
-		fmt.Printf("pimpom v%s\n", version)
+		fmt.Printf("pimpom %s\n", version)
 		return
 	}
 
