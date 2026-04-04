@@ -20,13 +20,31 @@ type Session struct {
 	CurrentPomodoro    int
 }
 
-// NewSession returns a session with default Pomodoro configuration.
-func NewSession() Session {
-	return Session{
+// Config holds the durations and rounds for a Pomodoro session.
+type Config struct {
+	WorkDuration       time.Duration
+	ShortBreakDuration time.Duration
+	LongBreakDuration  time.Duration
+	Rounds             int
+}
+
+// DefaultConfig returns the standard Pomodoro configuration.
+func DefaultConfig() Config {
+	return Config{
 		WorkDuration:       25 * time.Minute,
 		ShortBreakDuration: 5 * time.Minute,
 		LongBreakDuration:  15 * time.Minute,
 		Rounds:             4,
+	}
+}
+
+// NewSession returns a session with the given configuration.
+func NewSession(cfg Config) Session {
+	return Session{
+		WorkDuration:       cfg.WorkDuration,
+		ShortBreakDuration: cfg.ShortBreakDuration,
+		LongBreakDuration:  cfg.LongBreakDuration,
+		Rounds:             cfg.Rounds,
 		CurrentPomodoro:    1,
 	}
 }
