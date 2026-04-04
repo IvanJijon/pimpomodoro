@@ -9,16 +9,25 @@ import (
 	"github.com/IvanJijon/pimpomodoro/session"
 )
 
+// ViewMode represents the current UI mode.
+type ViewMode int
+
+const (
+	ModeNormal ViewMode = iota
+	ModeHelp
+	ModeSkipConfirm
+	ModeQuitConfirm
+)
+
 // Model holds the application state.
 type Model struct {
-	session         session.Session
-	header          *Header
-	spinner         spinner.Model
-	remainingTime   time.Duration
-	running         bool
-	showHelp        bool
-	showSkipConfirm bool
-	tickID          int
+	session       session.Session
+	header        *Header
+	spinner       spinner.Model
+	remainingTime time.Duration
+	running       bool
+	viewMode      ViewMode
+	tickID        int
 }
 
 // NewModel returns a Model with default session and UI.

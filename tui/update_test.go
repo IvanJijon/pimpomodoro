@@ -116,8 +116,7 @@ func TestUpdateKeyMsg(t *testing.T) {
 		wantPhase         session.Phase
 		wantRemainingTime time.Duration
 		wantRunning       bool
-		wantShowHelp      bool
-		wantConfirmSkip   bool
+		wantViewMode      ViewMode
 	}{
 		{
 			name:              "pressing s while Idle starts Work phase",
@@ -141,10 +140,8 @@ func TestUpdateKeyMsg(t *testing.T) {
 		{
 			name: "pressing s while running does not reset time",
 			setup: func(m *Model) {
-				// First press: start the session
 				updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'s'}})
 				*m = updated.(Model)
-				// Simulate some time passing
 				updated, _ = m.Update(TickMsg{id: m.tickID})
 				*m = updated.(Model)
 			},
@@ -189,7 +186,7 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantPhase:         session.Work,
 			wantRemainingTime: 12 * time.Minute,
 			wantRunning:       false,
-			wantConfirmSkip:   true,
+			wantViewMode:      ModeSkipConfirm,
 		},
 		{
 			name: "pressing y during confirm skip skips to next phase",
@@ -197,13 +194,13 @@ func TestUpdateKeyMsg(t *testing.T) {
 				m.session.CurrentPhase = session.Work
 				m.session.CurrentPomodoro = 1
 				m.remainingTime = 12 * time.Minute
-				m.showSkipConfirm = true
+				m.viewMode = ModeSkipConfirm
 			},
 			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'y'}},
 			wantPhase:         session.ShortBreak,
 			wantRemainingTime: 5 * time.Minute,
 			wantRunning:       false,
-			wantConfirmSkip:   false,
+			wantViewMode:      ModeNormal,
 		},
 		{
 			name: "pressing x during confirm skip cancels and resumes",
@@ -211,13 +208,13 @@ func TestUpdateKeyMsg(t *testing.T) {
 				m.session.CurrentPhase = session.Work
 				m.session.CurrentPomodoro = 1
 				m.remainingTime = 12 * time.Minute
-				m.showSkipConfirm = true
+				m.viewMode = ModeSkipConfirm
 			},
 			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}},
 			wantPhase:         session.Work,
 			wantRemainingTime: 12 * time.Minute,
 			wantRunning:       true,
-			wantConfirmSkip:   false,
+			wantViewMode:      ModeNormal,
 		},
 		{
 			name:              "pressing n while Idle is a no-op",
@@ -247,17 +244,43 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantRunning:       false,
 		},
 		{
-			name:         "pressing ? toggles help on",
+			name:         "pressing ? enters help mode",
 			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'?'}},
-			wantShowHelp: true,
+			wantViewMode: ModeHelp,
 		},
 		{
-			name: "pressing ? again toggles help off",
+			name: "pressing ? again exits help mode",
 			setup: func(m *Model) {
-				m.showHelp = true
+				m.viewMode = ModeHelp
 			},
 			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'?'}},
-			wantShowHelp: false,
+			wantViewMode: ModeNormal,
+		},
+		{
+			name: "pressing q shows quit confirmation",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 12 * time.Minute
+				m.running = true
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}},
+			wantPhase:         session.Work,
+			wantRemainingTime: 12 * time.Minute,
+			wantRunning:       false,
+			wantViewMode:      ModeQuitConfirm,
+		},
+		{
+			name: "pressing x during quit confirmation cancels and resumes",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 12 * time.Minute
+				m.viewMode = ModeQuitConfirm
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}},
+			wantPhase:         session.Work,
+			wantRemainingTime: 12 * time.Minute,
+			wantRunning:       true,
+			wantViewMode:      ModeNormal,
 		},
 	}
 
@@ -283,11 +306,8 @@ func TestUpdateKeyMsg(t *testing.T) {
 			if model.running != tt.wantRunning {
 				t.Errorf("running = %v, want %v", model.running, tt.wantRunning)
 			}
-			if model.showHelp != tt.wantShowHelp {
-				t.Errorf("showHelp = %v, want %v", model.showHelp, tt.wantShowHelp)
-			}
-			if model.showSkipConfirm != tt.wantConfirmSkip {
-				t.Errorf("showSkipConfirm = %v, want %v", model.showSkipConfirm, tt.wantConfirmSkip)
+			if model.viewMode != tt.wantViewMode {
+				t.Errorf("viewMode = %v, want %v", model.viewMode, tt.wantViewMode)
 			}
 		})
 	}

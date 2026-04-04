@@ -34,8 +34,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.running || msg.id != m.tickID {
 			return m, nil
 		}
-
-		// running
 		if m.remainingTime <= 0 {
 			m.session.NextPhase()
 			m.remainingTime = m.session.PhaseDuration()
@@ -45,64 +43,100 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.remainingTime -= time.Second
 		return m, tickCmd(m.tickID)
 	case tea.KeyMsg:
-		if m.showSkipConfirm {
-			switch msg.String() {
-			case "y":
-				m.session.NextPhase()
-				m.remainingTime = m.session.PhaseDuration()
-				m.showSkipConfirm = false
-			case "x":
-				m.showSkipConfirm = false
-				m.running = true
-				m.tickID++
-				return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
-			}
+		switch m.viewMode {
+		case ModeQuitConfirm:
+			return m.updateQuitConfirm(msg)
+		case ModeSkipConfirm:
+			return m.updateSkipConfirm(msg)
+		case ModeHelp:
+			return m.updateHelp(msg)
+		default:
+			return m.updateNormal(msg)
+		}
+	}
+	return m, nil
+}
+
+func (m Model) updateNormal(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "ctrl-c":
+		return m, tea.Quit
+	case "q":
+		m.viewMode = ModeQuitConfirm
+		m.running = false
+		return m, nil
+	case "s":
+		if m.running {
 			return m, nil
 		}
-		switch msg.String() {
-		case "ctrl-c", "q":
-			return m, tea.Quit
-		case "s":
-			if m.running {
-				return m, nil
-			}
-			if m.session.CurrentPhase == session.Idle {
-				m.session.NextPhase()
-				m.remainingTime = m.session.PhaseDuration()
-			}
-			m.running = true
-			m.tickID++
-			return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
-		case "p":
-			m.running = false
-			return m, nil
-		case "r":
+		if m.session.CurrentPhase == session.Idle {
+			m.session.NextPhase()
 			m.remainingTime = m.session.PhaseDuration()
-			m.running = false
-			return m, nil
-		case "n":
-			if m.session.CurrentPhase == session.Idle {
-				return m, nil
-			}
-			m.showSkipConfirm = true
-			m.running = false
-			return m, nil
-		case "b":
-			if m.session.CurrentPhase == session.Idle {
-				return m, nil
-			}
-			m.session.PreviousPhase()
-			m.remainingTime = m.session.PhaseDuration()
-			m.running = false
-			return m, nil
-		case "?":
-			if m.showHelp {
-				m.showHelp = false
-			} else {
-				m.showHelp = true
-			}
+		}
+		m.running = true
+		m.tickID++
+		return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
+	case "p":
+		m.running = false
+		return m, nil
+	case "r":
+		m.remainingTime = m.session.PhaseDuration()
+		m.running = false
+		return m, nil
+	case "n":
+		if m.session.CurrentPhase == session.Idle {
 			return m, nil
 		}
+		m.viewMode = ModeSkipConfirm
+		m.running = false
+		return m, nil
+	case "b":
+		if m.session.CurrentPhase == session.Idle {
+			return m, nil
+		}
+		m.session.PreviousPhase()
+		m.remainingTime = m.session.PhaseDuration()
+		m.running = false
+		return m, nil
+	case "?":
+		m.viewMode = ModeHelp
+		return m, nil
+	}
+	return m, nil
+}
+
+func (m Model) updateQuitConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "y":
+		return m, tea.Quit
+	case "x":
+		m.viewMode = ModeNormal
+		m.running = true
+		m.tickID++
+		return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
+	}
+	return m, nil
+}
+
+func (m Model) updateSkipConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "y":
+		m.session.NextPhase()
+		m.remainingTime = m.session.PhaseDuration()
+		m.viewMode = ModeNormal
+	case "x":
+		m.viewMode = ModeNormal
+		m.running = true
+		m.tickID++
+		return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
+	}
+	return m, nil
+}
+
+func (m Model) updateHelp(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "?":
+		m.viewMode = ModeNormal
 	}
 	return m, nil
 }
