@@ -9,6 +9,14 @@ import (
 	"github.com/IvanJijon/pimpomodoro/session"
 )
 
+func newTestModel() Model {
+	cb := Callbacks{
+		PlayAlarm:  func() {},
+		SendNotify: func(_, _ string) {},
+	}
+	return NewModel(session.DefaultConfig(), cb)
+}
+
 func TestUpdateTick(t *testing.T) {
 	tests := []struct {
 		name              string
@@ -84,7 +92,7 @@ func TestUpdateTick(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := NewModel()
+			m := newTestModel()
 			if tt.setup != nil {
 				tt.setup(&m)
 			}
@@ -296,7 +304,7 @@ func TestUpdateKeyMsg(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := NewModel()
+			m := newTestModel()
 			if tt.setup != nil {
 				tt.setup(&m)
 			}

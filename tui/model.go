@@ -6,7 +6,9 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 
+	"github.com/IvanJijon/pimpomodoro/notify"
 	"github.com/IvanJijon/pimpomodoro/session"
+	"github.com/IvanJijon/pimpomodoro/sound"
 )
 
 // ViewMode represents the current UI mode.
@@ -19,6 +21,20 @@ const (
 	ModeQuitConfirm
 )
 
+// Callbacks holds external side-effect functions injected into the model.
+type Callbacks struct {
+	PlayAlarm  func()
+	SendNotify func(string, string)
+}
+
+// DefaultCallbacks returns callbacks wired to real implementations.
+func DefaultCallbacks() Callbacks {
+	return Callbacks{
+		PlayAlarm:  sound.PlayAlarm,
+		SendNotify: notify.Send,
+	}
+}
+
 // Model holds the application state.
 type Model struct {
 	session       session.Session
@@ -27,13 +43,17 @@ type Model struct {
 	running       bool
 	viewMode      ViewMode
 	tickID        int
+
+	// not model but injected callbacks for side effects
+	callbacks Callbacks
 }
 
 // NewModel returns a Model with default session and UI.
-func NewModel() Model {
+func NewModel(cfg session.Config, cb Callbacks) Model {
 	return Model{
-		session: session.NewSession(),
-		spinner: newSpinner(),
+		session:   session.NewSession(cfg),
+		spinner:   newSpinner(),
+		callbacks: cb,
 	}
 }
 

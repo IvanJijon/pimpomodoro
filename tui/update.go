@@ -35,9 +35,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		if m.remainingTime <= 0 {
+			msg := phaseCompleteMessage(m.session.CurrentPhase)
 			m.session.NextPhase()
 			m.remainingTime = m.session.PhaseDuration()
 			m.running = false
+			m.callbacks.PlayAlarm()
+			m.callbacks.SendNotify("Pimpomodoro", msg)
 			return m, nil
 		}
 		m.remainingTime -= time.Second
@@ -143,3 +146,4 @@ func (m Model) updateHelp(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 	return m, nil
 }
+

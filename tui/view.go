@@ -114,3 +114,16 @@ func phaseColor(m Model) lipgloss.Color {
 func phaseTimerStyle(m Model) lipgloss.Style {
 	return timerTextStyle.Foreground(phaseColor(m))
 }
+
+func phaseCompleteMessage(phase session.Phase) string {
+	switch phase {
+	case session.Work:
+		return "Work session complete! Time for a break."
+	case session.ShortBreak:
+		return "Short break is over! Back to work."
+	case session.LongBreak:
+		return "Long break is over! Ready for a new cycle."
+	default:
+		return "Time's up!"
+	}
+}
