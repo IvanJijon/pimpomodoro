@@ -151,3 +151,66 @@ func TestPhaseDuration(t *testing.T) {
 		})
 	}
 }
+
+func TestPreviousPhase(t *testing.T) {
+	tests := []struct {
+		name         string
+		phase        Phase
+		pomodoro     int
+		wantPhase    Phase
+		wantPomodoro int
+	}{
+		{
+			name:         "Work #1 is a no-op",
+			phase:        Work,
+			pomodoro:     1,
+			wantPhase:    Work,
+			wantPomodoro: 1,
+		},
+		{
+			name:         "Idle is a no-op",
+			phase:        Idle,
+			pomodoro:     1,
+			wantPhase:    Idle,
+			wantPomodoro: 1,
+		},
+		{
+			name:         "ShortBreak goes back to Work same pomodoro",
+			phase:        ShortBreak,
+			pomodoro:     2,
+			wantPhase:    Work,
+			wantPomodoro: 2,
+		},
+		{
+			name:         "Work #2 goes back to ShortBreak and decrements pomodoro",
+			phase:        Work,
+			pomodoro:     2,
+			wantPhase:    ShortBreak,
+			wantPomodoro: 1,
+		},
+		{
+			name:         "LongBreak goes back to Work last pomodoro",
+			phase:        LongBreak,
+			pomodoro:     4,
+			wantPhase:    Work,
+			wantPomodoro: 4,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := NewSession()
+			s.CurrentPhase = tt.phase
+			s.CurrentPomodoro = tt.pomodoro
+
+			s.PreviousPhase()
+
+			if s.CurrentPhase != tt.wantPhase {
+				t.Errorf("CurrentPhase = %v, want %v", s.CurrentPhase, tt.wantPhase)
+			}
+			if s.CurrentPomodoro != tt.wantPomodoro {
+				t.Errorf("CurrentPomodoro = %v, want %v", s.CurrentPomodoro, tt.wantPomodoro)
+			}
+		})
+	}
+}

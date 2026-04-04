@@ -51,6 +51,21 @@ func (s *Session) NextPhase() {
 	}
 }
 
+// PreviousPhase moves the session back to the previous phase in the Pomodoro cycle.
+func (s *Session) PreviousPhase() {
+	switch s.CurrentPhase {
+	case Work:
+		if s.CurrentPomodoro > 1 {
+			s.CurrentPhase = ShortBreak
+			s.CurrentPomodoro--
+		}
+	case ShortBreak:
+		s.CurrentPhase = Work
+	case LongBreak:
+		s.CurrentPhase = Work
+	}
+}
+
 // PhaseDuration returns the duration of the current phase.
 func (s *Session) PhaseDuration() time.Duration {
 	switch s.CurrentPhase {
