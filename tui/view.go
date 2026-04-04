@@ -39,7 +39,7 @@ var (
 func (m Model) View() string {
 	s := m.header.View()
 
-	if m.showHelp {
+	if m.viewMode == ModeHelp {
 		s += "\n  Keybindings:\n\n"
 		s += "  s  Start/resume\n"
 		s += "  p  Pause\n"
@@ -60,8 +60,11 @@ func (m Model) View() string {
 		s += "\n" + centerStyle.Render(timerTextStyle.Render(formatDuration(m.remainingTime))) + "\n"
 	}
 
-	if m.showSkipConfirm {
+	if m.viewMode == ModeSkipConfirm {
 		dialog := dialogStyle.Render("Skip to next phase?\n\n(y) confirm  (x) cancel")
+		s += "\n" + centerStyle.Render(dialog) + "\n"
+	} else if m.viewMode == ModeQuitConfirm {
+		dialog := dialogStyle.Render("Quit?\n\n(y) confirm  (x) cancel")
 		s += "\n" + centerStyle.Render(dialog) + "\n"
 	} else {
 		s += "\n" + footerStyle.Render("(?) help  (q) quit") + "\n"
