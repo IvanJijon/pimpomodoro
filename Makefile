@@ -13,6 +13,11 @@ run:
 test:
 	go test ./...
 
+.PHONY: cover
+cover:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out
+
 .PHONY: build-all
 build-all:
 	@mkdir -p bin
