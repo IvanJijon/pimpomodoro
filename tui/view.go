@@ -13,6 +13,12 @@ import (
 const viewWidth = 40
 
 var (
+	headerStyle = lipgloss.NewStyle().
+			Bold(true).
+			Padding(1).
+			AlignHorizontal(lipgloss.Center).
+			Width(viewWidth)
+
 	centerStyle = lipgloss.NewStyle().
 			Width(viewWidth).
 			AlignHorizontal(lipgloss.Center)
@@ -37,7 +43,7 @@ var (
 
 // View renders the current state to the terminal.
 func (m Model) View() string {
-	s := m.header.View()
+	s := headerStyle.Render("\U0001f345 Pimpomodoro Timer")
 
 	if m.viewMode == ModeHelp {
 		s += "\n  Keybindings:\n\n"
@@ -55,7 +61,7 @@ func (m Model) View() string {
 	if m.running {
 		s += "\n" + centerStyle.Render(strings.TrimRight(m.spinner.View(), " ")+phaseTimerStyle(m).Render(formatDuration(m.remainingTime))) + "\n"
 	} else if m.session.CurrentPhase != session.Idle {
-		s += "\n" + centerStyle.Render(pausedStyle.Render("⏸ "+formatDuration(m.remainingTime))) + "\n"
+		s += "\n" + centerStyle.Render(pausedStyle.Render("\u23f8 "+formatDuration(m.remainingTime))) + "\n"
 	} else {
 		s += "\n" + centerStyle.Render(timerTextStyle.Render(formatDuration(m.remainingTime))) + "\n"
 	}

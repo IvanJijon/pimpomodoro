@@ -22,7 +22,6 @@ const (
 // Model holds the application state.
 type Model struct {
 	session       session.Session
-	header        *Header
 	spinner       spinner.Model
 	remainingTime time.Duration
 	running       bool
@@ -34,7 +33,6 @@ type Model struct {
 func NewModel() Model {
 	return Model{
 		session: session.NewSession(),
-		header:  NewHeader(),
 		spinner: newSpinner(),
 	}
 }
