@@ -111,9 +111,12 @@ func (m Model) updateQuitConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, tea.Quit
 	case "x":
 		m.viewMode = ModeNormal
-		m.running = true
-		m.tickID++
-		return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
+		if m.session.CurrentPhase != session.Idle {
+			m.running = true
+			m.tickID++
+			return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
+		}
+		return m, nil
 	}
 	return m, nil
 }

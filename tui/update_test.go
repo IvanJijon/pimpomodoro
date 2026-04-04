@@ -282,6 +282,16 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantRunning:       true,
 			wantViewMode:      ModeNormal,
 		},
+		{
+			name: "pressing x during quit confirmation while Idle stays Idle",
+			setup: func(m *Model) {
+				m.viewMode = ModeQuitConfirm
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}},
+			wantPhase:    session.Idle,
+			wantRunning:  false,
+			wantViewMode: ModeNormal,
+		},
 	}
 
 	for _, tt := range tests {
