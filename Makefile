@@ -1,10 +1,23 @@
-VERSION ?= $(shell git describe --tags --always 2>/dev/null || echo "dev")
+ifeq ($(OS),Windows_NT)
+    # Windows version
+    VERSION ?= $(shell git describe --tags --always 2>NUL || echo dev)
+else
+    # Linux/macOS version
+    VERSION ?= $(shell git describe --tags --always 2>/dev/null || echo "dev")
+endif
 
 .PHONY: build
 build:
 	@echo "Building pimpom $(VERSION)..."
 	@mkdir -p bin
 	go build -ldflags "-X main.version=$(VERSION)" -o bin/pimpom main.go
+	@echo "Build completed."
+
+.PHONY: build-win
+build-win:
+	@echo "Building pimpom $(VERSION)..."
+	@if not exist "bin" mkdir "bin" 2>NUL
+	go build -ldflags "-X main.version=$(VERSION)" -o bin/pimpom.exe main.go
 	@echo "Build completed."
 
 .PHONY: run
