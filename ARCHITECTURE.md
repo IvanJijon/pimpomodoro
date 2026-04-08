@@ -8,12 +8,26 @@ Pimpomodoro follows the [Elm Architecture](https://guide.elm-lang.org/architectu
 
 ```
 pimpomodoro/
-├── main.go        Entry point, CLI flags, dependency wiring
-├── session/       Domain logic — session config, phase state machine
-├── tui/           Terminal UI — Bubble Tea model, update, view
-├── sound/         Platform-specific alarm sounds
-├── notify/        Platform-specific desktop notifications
-└── Makefile       Build, test, release commands
+├── main.go              Entry point, CLI flags, parseAppConfig()
+├── session/             Domain logic — session config, phase state machine
+│   ├── session.go       Session, Config, state machine
+│   └── phase.go         Phase type and constants
+├── tui/                 Terminal UI — Bubble Tea model, update, view
+│   ├── model.go         Model struct, AppConfig, Callbacks, ViewMode, NewModel, Init
+│   ├── update.go        Update dispatcher (thin router to handlers)
+│   ├── handle_key.go    Key handlers per view mode
+│   ├── handle_tick.go   Window size, spinner tick, timer tick handlers
+│   ├── handle_blink.go  Visual alert blink handler
+│   ├── tick.go          TickMsg and tickCmd (1s interval)
+│   ├── blink.go         BlinkMsg and blinkCmd (500ms interval)
+│   ├── view.go          View rendering + styles + display helpers
+│   ├── spinner.go       Spinner component config
+│   ├── colors.go        Color constants
+│   ├── update_test.go   Table-driven tests for update logic
+│   └── view_test.go     Tests for formatDuration
+├── sound/               Platform-specific alarm sounds
+├── notify/              Platform-specific desktop notifications
+└── Makefile             Build, test, release commands
 ```
 
 ## Session
@@ -40,9 +54,21 @@ Idle → Work → ShortBreak → Work → ShortBreak → ... → Work → LongBr
 
 The `tui` package implements the Bubble Tea application using the Elm Architecture:
 
-- **Model** — application state (session, timer, running flag, view mode)
-- **Update** — handles messages (key presses, ticks) and returns the updated model
+- **Model** — application state, grouped by subject (timer, visual alert, UI, config & callbacks)
+- **Update** — thin dispatcher that routes messages to dedicated handler files
 - **View** — renders the current state to the terminal as a string
+
+### Update Dispatcher
+
+`update.go` routes each message type to its handler:
+
+| Message | Handler file | Handler method |
+|---------|-------------|----------------|
+| `tea.WindowSizeMsg` | `handle_tick.go` | `handleWindowSize` |
+| `spinner.TickMsg` | `handle_tick.go` | `handleSpinnerTick` |
+| `TickMsg` | `handle_tick.go` | `handleTick` |
+| `BlinkMsg` | `handle_blink.go` | `handleBlink` |
+| `tea.KeyMsg` | `handle_key.go` | `handleKey` → per-mode handlers |
 
 ### View Modes
 
@@ -57,7 +83,7 @@ The UI uses a `ViewMode` to determine which screen is active and which keys are 
 | `ModePreviousConfirm` | Previous phase confirmation dialog |
 | `ModeQuitConfirm` | Quit confirmation dialog |
 
-Each mode has its own update handler, keeping the key handling clean and separated.
+Each mode has its own key handler in `handle_key.go`.
 
 ### Timer
 
@@ -65,9 +91,28 @@ The countdown is driven by `tea.Tick`, which sends a `TickMsg` every second. Eac
 
 1. Decrements remaining time by one second
 2. Schedules the next tick
-3. When time reaches zero: transitions to the next phase, plays alarm, sends notification
+3. When time reaches zero: transitions to the next phase, plays alarm, sends notification, starts blink loop if visual alert is enabled
 
 A **tick ID** mechanism prevents parallel tick loops. Each new tick loop gets an incremented ID. Stale ticks from old loops are ignored.
+
+### Visual Alert
+
+Accessibility feature for users with hearing difficulties. Enabled via `--visual-alert` flag (off by default).
+
+- On timer expiry: `alerting = true`, `alertColor` captures the completed phase's color
+- `BlinkMsg` fires every 500ms via `blinkCmd`, toggling `blinkState`
+- View applies phase-colored background to the entire terminal when `alerting && blinkState`
+- Any keypress dismisses the alert (cleared at top of `handleKey`)
+
+### Confirmation Dialogs
+
+Skip, reset, previous, and quit all follow the same pattern:
+1. Key press → set `viewMode` to confirm mode, pause timer
+2. View shows dialog with `(y) confirm  (n) cancel`
+3. `y` → execute action
+4. `n` → cancel, resume timer
+
+Confirmations can be disabled globally via `--no-confirm` flag.
 
 ### Styling
 
@@ -104,7 +149,7 @@ Both are injected into the model via a `Callbacks` struct, allowing them to be r
 
 ## CLI
 
-Flags are parsed in `main.go` using Go's standard `flag` package:
+All flags are parsed in `main.go` via `parseAppConfig()` → `tui.AppConfig`.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -114,6 +159,8 @@ Flags are parsed in `main.go` using Go's standard `flag` package:
 | `--rounds` | 4 | Pomodoros before long break |
 | `--no-sound` | false | Disable alarm sound |
 | `--no-notify` | false | Disable desktop notifications |
+| `--no-confirm` | false | Disable confirmation dialogs |
+| `--visual-alert` | false | Enable visual alert (blinking) |
 | `--version` | — | Print version and exit |
 
 Version is injected at build time from git tags via `-ldflags`.
