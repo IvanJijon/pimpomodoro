@@ -32,6 +32,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.session.NextPhase()
 			m.remainingTime = m.session.PhaseDuration()
 			m.running = false
+			if m.visualAlert {
+				m.alerting = true
+			}
 			m.callbacks.PlayAlarm()
 			m.callbacks.SendNotify("Pimpomodoro", msg)
 			return m, nil

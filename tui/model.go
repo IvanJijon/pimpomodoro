@@ -55,6 +55,8 @@ type Model struct {
 	width          int
 	height         int
 	confirmEnabled bool
+	visualAlert    bool
+	alerting       bool
 
 	// not model but injected callbacks for side effects
 	callbacks Callbacks

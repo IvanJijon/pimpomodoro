@@ -119,6 +119,43 @@ func TestUpdateTick(t *testing.T) {
 	}
 }
 
+func TestVisualAlert(t *testing.T) {
+	tests := []struct {
+		name         string
+		setup        func(*Model)
+		msg          tea.Msg
+		wantAlerting bool
+	}{
+		{
+			name: "timer expiry sets alerting when visual alert enabled",
+			setup: func(m *Model) {
+				m.visualAlert = true
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 0
+				m.running = true
+			},
+			msg:          TickMsg{},
+			wantAlerting: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := newTestModel()
+			if tt.setup != nil {
+				tt.setup(&m)
+			}
+
+			updated, _ := m.Update(tt.msg)
+			model := updated.(Model)
+
+			if model.alerting != tt.wantAlerting {
+				t.Errorf("alerting = %v, want %v", model.alerting, tt.wantAlerting)
+			}
+		})
+	}
+}
+
 func TestUpdateWindowSize(t *testing.T) {
 	tests := []struct {
 		name       string
