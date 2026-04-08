@@ -48,22 +48,27 @@ type AppConfig struct {
 
 // Model holds the application state.
 type Model struct {
-	session        session.Session
-	spinner        spinner.Model
-	remainingTime  time.Duration
-	running        bool
-	viewMode       ViewMode
-	tickID         int
-	width          int
-	height         int
-	confirmEnabled bool
-	visualAlert    bool
-	alerting       bool
-	blinkState     bool
-	alertColor     lipgloss.Color
+	// Timer
+	session       session.Session
+	remainingTime time.Duration
+	running       bool
+	tickID        int
 
-	// not model but injected callbacks for side effects
-	callbacks Callbacks
+	// Visual alert
+	visualAlert bool
+	alerting    bool
+	blinkState  bool
+	alertColor  lipgloss.Color
+
+	// UI
+	spinner  spinner.Model
+	viewMode ViewMode
+	width    int
+	height   int
+
+	// Config & callbacks
+	confirmEnabled bool
+	callbacks      Callbacks
 }
 
 // NewModel returns a Model with the given application configuration.
