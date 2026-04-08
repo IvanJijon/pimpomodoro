@@ -76,6 +76,9 @@ func (m Model) View() string {
 	case ModeResetConfirm:
 		dialog := dialogStyle.Render("Reset current phase?\n\n(y) confirm  (n) cancel")
 		s += "\n" + centerStyle.Render(dialog) + "\n"
+	case ModePreviousConfirm:
+		dialog := dialogStyle.Render("Go to previous phase?\n\n(y) confirm  (n) cancel")
+		s += "\n" + centerStyle.Render(dialog) + "\n"
 	case ModeNormal:
 		s += "\n" + footerStyle.Render("(?) help  (q) quit") + "\n"
 	case ModeHelp:

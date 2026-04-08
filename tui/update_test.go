@@ -282,7 +282,7 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantRunning:       false,
 		},
 		{
-			name: "pressing b goes to previous phase",
+			name: "pressing b shows previous phase confirmation",
 			setup: func(m *Model) {
 				m.session.CurrentPhase = session.ShortBreak
 				m.session.CurrentPomodoro = 2
@@ -290,9 +290,38 @@ func TestUpdateKeyMsg(t *testing.T) {
 				m.running = true
 			},
 			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'b'}},
+			wantPhase:         session.ShortBreak,
+			wantRemainingTime: 3 * time.Minute,
+			wantRunning:       false,
+			wantViewMode:      ModePreviousConfirm,
+		},
+		{
+			name: "pressing y during previous confirmation goes to previous phase",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.ShortBreak
+				m.session.CurrentPomodoro = 2
+				m.remainingTime = 3 * time.Minute
+				m.viewMode = ModePreviousConfirm
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'y'}},
 			wantPhase:         session.Work,
 			wantRemainingTime: 25 * time.Minute,
 			wantRunning:       false,
+			wantViewMode:      ModeNormal,
+		},
+		{
+			name: "pressing n during previous confirmation cancels and resumes",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.ShortBreak
+				m.session.CurrentPomodoro = 2
+				m.remainingTime = 3 * time.Minute
+				m.viewMode = ModePreviousConfirm
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}},
+			wantPhase:         session.ShortBreak,
+			wantRemainingTime: 3 * time.Minute,
+			wantRunning:       true,
+			wantViewMode:      ModeNormal,
 		},
 		{
 			name:              "pressing b while Idle is a no-op",

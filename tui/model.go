@@ -20,6 +20,7 @@ const (
 	ModeSkipConfirm
 	ModeQuitConfirm
 	ModeResetConfirm
+	ModePreviousConfirm
 )
 
 // Callbacks holds external side-effect functions injected into the model.

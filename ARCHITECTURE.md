@@ -54,6 +54,7 @@ The UI uses a `ViewMode` to determine which screen is active and which keys are 
 | `ModeHelp` | Keybindings help screen |
 | `ModeSkipConfirm` | Skip phase confirmation dialog |
 | `ModeResetConfirm` | Reset phase confirmation dialog |
+| `ModePreviousConfirm` | Previous phase confirmation dialog |
 | `ModeQuitConfirm` | Quit confirmation dialog |
 
 Each mode has its own update handler, keeping the key handling clean and separated.
