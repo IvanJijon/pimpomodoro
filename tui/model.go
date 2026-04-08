@@ -47,6 +47,7 @@ type Model struct {
 	tickID        int
 	width         int
 	height        int
+	confirmEnabled bool
 
 	// not model but injected callbacks for side effects
 	callbacks Callbacks
@@ -55,9 +56,10 @@ type Model struct {
 // NewModel returns a Model with default session and UI.
 func NewModel(cfg session.Config, cb Callbacks) Model {
 	return Model{
-		session:   session.NewSession(cfg),
-		spinner:   newSpinner(),
-		callbacks: cb,
+		session:        session.NewSession(cfg),
+		spinner:        newSpinner(),
+		callbacks:      cb,
+		confirmEnabled: true,
 	}
 }
 

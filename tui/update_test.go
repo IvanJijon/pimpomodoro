@@ -194,6 +194,20 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantRunning:       false,
 		},
 		{
+			name: "pressing r with confirmations disabled resets directly",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 12 * time.Minute
+				m.running = true
+				m.confirmEnabled = false
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'r'}},
+			wantPhase:         session.Work,
+			wantRemainingTime: 25 * time.Minute,
+			wantRunning:       false,
+			wantViewMode:      ModeNormal,
+		},
+		{
 			name: "pressing r shows reset confirmation",
 			setup: func(m *Model) {
 				m.session.CurrentPhase = session.Work
@@ -230,6 +244,21 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantPhase:         session.Work,
 			wantRemainingTime: 12 * time.Minute,
 			wantRunning:       true,
+			wantViewMode:      ModeNormal,
+		},
+		{
+			name: "pressing n with confirmations disabled skips directly",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.session.CurrentPomodoro = 1
+				m.remainingTime = 12 * time.Minute
+				m.running = true
+				m.confirmEnabled = false
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}},
+			wantPhase:         session.ShortBreak,
+			wantRemainingTime: 5 * time.Minute,
+			wantRunning:       false,
 			wantViewMode:      ModeNormal,
 		},
 		{
@@ -324,6 +353,21 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantViewMode:      ModeNormal,
 		},
 		{
+			name: "pressing b with confirmations disabled goes directly to previous phase",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.ShortBreak
+				m.session.CurrentPomodoro = 2
+				m.remainingTime = 3 * time.Minute
+				m.running = true
+				m.confirmEnabled = false
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'b'}},
+			wantPhase:         session.Work,
+			wantRemainingTime: 25 * time.Minute,
+			wantRunning:       false,
+			wantViewMode:      ModeNormal,
+		},
+		{
 			name:              "pressing b while Idle is a no-op",
 			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'b'}},
 			wantPhase:         session.Idle,
@@ -342,6 +386,20 @@ func TestUpdateKeyMsg(t *testing.T) {
 			},
 			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'?'}},
 			wantViewMode: ModeNormal,
+		},
+		{
+			name: "pressing q with confirmations disabled quits directly",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 12 * time.Minute
+				m.running = true
+				m.confirmEnabled = false
+			},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'q'}},
+			wantPhase:         session.Work,
+			wantRemainingTime: 12 * time.Minute,
+			wantRunning:       true,
+			wantViewMode:      ModeNormal,
 		},
 		{
 			name: "pressing q shows quit confirmation",

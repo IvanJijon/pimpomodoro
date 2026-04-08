@@ -64,9 +64,12 @@ func (m Model) updateNormal(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "ctrl-c":
 		return m, tea.Quit
 	case "q":
-		m.viewMode = ModeQuitConfirm
-		m.running = false
-		return m, nil
+		if m.confirmEnabled {
+			m.viewMode = ModeQuitConfirm
+			m.running = false
+			return m, nil
+		}
+		return m, tea.Quit
 	case "s":
 		if m.running {
 			m.running = false
@@ -80,21 +83,38 @@ func (m Model) updateNormal(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.tickID++
 		return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
 	case "r":
-		m.viewMode = ModeResetConfirm
+		if m.confirmEnabled {
+			m.viewMode = ModeResetConfirm
+			m.running = false
+			return m, nil
+		}
+		m.remainingTime = m.session.PhaseDuration()
 		m.running = false
 		return m, nil
 	case "n":
 		if m.session.CurrentPhase == session.Idle {
 			return m, nil
 		}
-		m.viewMode = ModeSkipConfirm
+		if m.confirmEnabled {
+			m.viewMode = ModeSkipConfirm
+			m.running = false
+			return m, nil
+		}
+		m.session.NextPhase()
+		m.remainingTime = m.session.PhaseDuration()
 		m.running = false
 		return m, nil
 	case "b":
 		if m.session.CurrentPhase == session.Idle {
 			return m, nil
 		}
-		m.viewMode = ModePreviousConfirm
+		if m.confirmEnabled {
+			m.viewMode = ModePreviousConfirm
+			m.running = false
+			return m, nil
+		}
+		m.session.PreviousPhase()
+		m.remainingTime = m.session.PhaseDuration()
 		m.running = false
 		return m, nil
 	case "?":
