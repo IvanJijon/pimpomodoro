@@ -67,6 +67,7 @@ func (m Model) updateNormal(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	case "s":
 		if m.running {
+			m.running = false
 			return m, nil
 		}
 		if m.session.CurrentPhase == session.Idle {
@@ -76,9 +77,6 @@ func (m Model) updateNormal(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.running = true
 		m.tickID++
 		return m, tea.Batch(tickCmd(m.tickID), m.spinner.Tick)
-	case "p":
-		m.running = false
-		return m, nil
 	case "r":
 		m.viewMode = ModeResetConfirm
 		m.running = false

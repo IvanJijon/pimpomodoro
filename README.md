@@ -42,8 +42,7 @@ pimpom --no-sound --no-notify
 
 | Key | Action |
 |-----|--------|
-| `s` | Start/resume |
-| `p` | Pause |
+| `s` | Start/pause |
 | `r` | Reset current phase |
 | `n` | Skip to next phase |
 | `b` | Go to previous phase |

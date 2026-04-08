@@ -47,8 +47,7 @@ func (m Model) View() string {
 
 	if m.viewMode == ModeHelp {
 		s += "\n  Keybindings:\n\n"
-		s += "  s  Start/resume\n"
-		s += "  p  Pause\n"
+		s += "  s  Start/pause\n"
 		s += "  r  Reset current phase\n"
 		s += "  n  Skip to next phase\n"
 		s += "  b  Go to previous phase\n"

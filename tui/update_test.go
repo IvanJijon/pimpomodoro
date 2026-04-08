@@ -181,7 +181,7 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantRunning:       true,
 		},
 		{
-			name: "pressing s while running does not reset time",
+			name: "pressing s while running pauses without resetting time",
 			setup: func(m *Model) {
 				updated, _ := m.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'s'}})
 				*m = updated.(Model)
@@ -191,18 +191,6 @@ func TestUpdateKeyMsg(t *testing.T) {
 			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'s'}},
 			wantPhase:         session.Work,
 			wantRemainingTime: 24*time.Minute + 59*time.Second,
-			wantRunning:       true,
-		},
-		{
-			name: "pressing p pauses the timer",
-			setup: func(m *Model) {
-				m.session.CurrentPhase = session.Work
-				m.remainingTime = 20 * time.Minute
-				m.running = true
-			},
-			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'p'}},
-			wantPhase:         session.Work,
-			wantRemainingTime: 20 * time.Minute,
 			wantRunning:       false,
 		},
 		{
