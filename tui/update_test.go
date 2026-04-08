@@ -121,10 +121,11 @@ func TestUpdateTick(t *testing.T) {
 
 func TestVisualAlert(t *testing.T) {
 	tests := []struct {
-		name         string
-		setup        func(*Model)
-		msg          tea.Msg
-		wantAlerting bool
+		name           string
+		setup          func(*Model)
+		msg            tea.Msg
+		wantAlerting   bool
+		wantBlinkState bool
 	}{
 		{
 			name: "timer expiry sets alerting when visual alert enabled",
@@ -136,6 +137,44 @@ func TestVisualAlert(t *testing.T) {
 			},
 			msg:          TickMsg{},
 			wantAlerting: true,
+		},
+		{
+			name: "timer expiry does not set alerting when visual alert disabled",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 0
+				m.running = true
+			},
+			msg:          TickMsg{},
+			wantAlerting: false,
+		},
+		{
+			name: "any keypress clears alerting",
+			setup: func(m *Model) {
+				m.alerting = true
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'s'}},
+			wantAlerting: false,
+		},
+		{
+			name: "blink msg toggles blinkState while alerting",
+			setup: func(m *Model) {
+				m.alerting = true
+				m.blinkState = false
+			},
+			msg:            BlinkMsg{},
+			wantAlerting:   true,
+			wantBlinkState: true,
+		},
+		{
+			name: "blink msg is ignored when not alerting",
+			setup: func(m *Model) {
+				m.alerting = false
+				m.blinkState = false
+			},
+			msg:            BlinkMsg{},
+			wantAlerting:   false,
+			wantBlinkState: false,
 		},
 	}
 
@@ -151,6 +190,9 @@ func TestVisualAlert(t *testing.T) {
 
 			if model.alerting != tt.wantAlerting {
 				t.Errorf("alerting = %v, want %v", model.alerting, tt.wantAlerting)
+			}
+			if model.blinkState != tt.wantBlinkState {
+				t.Errorf("blinkState = %v, want %v", model.blinkState, tt.wantBlinkState)
 			}
 		})
 	}

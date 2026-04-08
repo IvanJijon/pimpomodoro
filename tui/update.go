@@ -14,6 +14,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m.handleSpinnerTick(msg)
 	case TickMsg:
 		return m.handleTick(msg)
+	case BlinkMsg:
+		return m.handleBlink()
 	case tea.KeyMsg:
 		return m.handleKey(msg)
 	}

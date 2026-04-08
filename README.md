@@ -25,6 +25,7 @@ pimpom [flags]
 | `--no-sound` | false | Disable alarm sound |
 | `--no-notify` | false | Disable desktop notifications |
 | `--no-confirm` | false | Disable confirmation dialogs |
+| `--visual-alert` | false | Enable visual alert (blinking) when timer expires |
 
 ### Examples
 

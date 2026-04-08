@@ -8,6 +8,8 @@ import (
 
 // handleKey dispatches key messages to the appropriate handler based on the current view mode.
 func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	// Dismiss visual alert on any keypress.
+	m.alerting = false
 	switch m.viewMode {
 	case ModeNormal:
 		return m.handleKeyNormal(msg)

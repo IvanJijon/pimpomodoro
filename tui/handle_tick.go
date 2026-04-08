@@ -31,14 +31,18 @@ func (m Model) handleTick(msg TickMsg) (tea.Model, tea.Cmd) {
 	}
 	if m.remainingTime <= 0 {
 		notifyMsg := phaseCompleteMessage(m.session.CurrentPhase)
+		if m.visualAlert {
+			m.alertColor = phaseColor(m)
+			m.alerting = true
+		}
 		m.session.NextPhase()
 		m.remainingTime = m.session.PhaseDuration()
 		m.running = false
-		if m.visualAlert {
-			m.alerting = true
-		}
 		m.callbacks.PlayAlarm()
 		m.callbacks.SendNotify("Pimpomodoro", notifyMsg)
+		if m.alerting {
+			return m, blinkCmd()
+		}
 		return m, nil
 	}
 	m.remainingTime -= time.Second

@@ -5,6 +5,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 
 	"github.com/IvanJijon/pimpomodoro/notify"
 	"github.com/IvanJijon/pimpomodoro/session"
@@ -42,6 +43,7 @@ type AppConfig struct {
 	Session        session.Config
 	Callbacks      Callbacks
 	ConfirmEnabled bool
+	VisualAlert    bool
 }
 
 // Model holds the application state.
@@ -57,6 +59,8 @@ type Model struct {
 	confirmEnabled bool
 	visualAlert    bool
 	alerting       bool
+	blinkState     bool
+	alertColor     lipgloss.Color
 
 	// not model but injected callbacks for side effects
 	callbacks Callbacks
@@ -69,6 +73,7 @@ func NewModel(cfg AppConfig) Model {
 		spinner:        newSpinner(),
 		callbacks:      cfg.Callbacks,
 		confirmEnabled: cfg.ConfirmEnabled,
+		visualAlert:    cfg.VisualAlert,
 	}
 }
 

@@ -89,6 +89,14 @@ func (m Model) View() string {
 
 	if m.width > 0 && m.height > 0 {
 		s = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, s)
+		if m.alerting && m.blinkState {
+			bgStyle := lipgloss.NewStyle().Background(m.alertColor).Width(m.width)
+			lines := strings.Split(s, "\n")
+			for i, line := range lines {
+				lines[i] = bgStyle.Render(line)
+			}
+			s = strings.Join(lines, "\n")
+		}
 	}
 
 	return s
