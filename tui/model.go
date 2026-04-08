@@ -44,6 +44,8 @@ type Model struct {
 	running       bool
 	viewMode      ViewMode
 	tickID        int
+	width         int
+	height        int
 
 	// not model but injected callbacks for side effects
 	callbacks Callbacks

@@ -85,6 +85,10 @@ func (m Model) View() string {
 		s += "\n" + footerStyle.Render("(?) help  (q) quit") + "\n"
 	}
 
+	if m.width > 0 && m.height > 0 {
+		s = lipgloss.Place(m.width, m.height, lipgloss.Center, lipgloss.Center, s)
+	}
+
 	return s
 }
 
