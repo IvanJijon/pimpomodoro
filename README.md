@@ -49,3 +49,8 @@ pimpom --no-sound --no-notify
 | `b` | Go to previous phase |
 | `?` | Toggle help |
 | `q` | Quit |
+
+
+## Architecture
+
+See [ARCHITECTURE.md](ARCHITECTURE.md) for technical details on how Pimpomodoro is built.
