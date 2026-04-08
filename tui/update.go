@@ -9,17 +9,6 @@ import (
 	"github.com/IvanJijon/pimpomodoro/session"
 )
 
-// TickMsg is sent by the Bubble Tea runtime every second via tea.Tick.
-type TickMsg struct {
-	id int
-}
-
-func tickCmd(id int) tea.Cmd {
-	return tea.Tick(time.Second, func(_ time.Time) tea.Msg {
-		return TickMsg{id: id}
-	})
-}
-
 // Update handles messages and updates the model accordingly.
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
