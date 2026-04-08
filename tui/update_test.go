@@ -11,8 +11,8 @@ import (
 
 func newTestModel() Model {
 	cb := Callbacks{
-		PlayAlarm:  func() {},
-		SendNotify: func(_, _ string) {},
+		PlayAlarm:  func() {},            // no-op
+		SendNotify: func(_, _ string) {}, // no-op
 	}
 	return NewModel(session.DefaultConfig(), cb)
 }
