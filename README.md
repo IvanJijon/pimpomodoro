@@ -24,6 +24,7 @@ pimpom [flags]
 | `--rounds` | 4 | Number of pomodoros before long break |
 | `--no-sound` | false | Disable alarm sound |
 | `--no-notify` | false | Disable desktop notifications |
+| `--no-confirm` | false | Disable confirmation dialogs |
 
 ### Examples
 

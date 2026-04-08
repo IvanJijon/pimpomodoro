@@ -15,13 +15,14 @@ import (
 var (
 	version = "dev"
 
-	work     = flag.Int("work", 25, "work duration in minutes")
-	brk      = flag.Int("break", 5, "short break duration in minutes")
-	longBrk  = flag.Int("long-break", 15, "long break duration in minutes")
-	rounds   = flag.Int("rounds", 4, "number of pomodoros before long break")
-	noSound  = flag.Bool("no-sound", false, "disable alarm sound")
-	noNotify = flag.Bool("no-notify", false, "disable desktop notifications")
-	showVer  = flag.Bool("version", false, "print version and exit")
+	work      = flag.Int("work", 25, "work duration in minutes")
+	brk       = flag.Int("break", 5, "short break duration in minutes")
+	longBrk   = flag.Int("long-break", 15, "long break duration in minutes")
+	rounds    = flag.Int("rounds", 4, "number of pomodoros before long break")
+	noSound   = flag.Bool("no-sound", false, "disable alarm sound")
+	noNotify  = flag.Bool("no-notify", false, "disable desktop notifications")
+	noConfirm = flag.Bool("no-confirm", false, "disable confirmation dialogs")
+	showVer   = flag.Bool("version", false, "print version and exit")
 )
 
 func main() {
@@ -32,23 +33,14 @@ func main() {
 		return
 	}
 
-	p := tea.NewProgram(tui.NewModel(parseConfig(), parseCallbacks()), tea.WithAltScreen())
+	p := tea.NewProgram(tui.NewModel(parseAppConfig()), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Printf("Oops! There's been an error: %v", err)
 		os.Exit(1)
 	}
 }
 
-func parseConfig() session.Config {
-	return session.Config{
-		WorkDuration:       time.Duration(*work) * time.Minute,
-		ShortBreakDuration: time.Duration(*brk) * time.Minute,
-		LongBreakDuration:  time.Duration(*longBrk) * time.Minute,
-		Rounds:             *rounds,
-	}
-}
-
-func parseCallbacks() tui.Callbacks {
+func parseAppConfig() tui.AppConfig {
 	cb := tui.DefaultCallbacks()
 	if *noSound {
 		cb.PlayAlarm = func() {}
@@ -56,5 +48,15 @@ func parseCallbacks() tui.Callbacks {
 	if *noNotify {
 		cb.SendNotify = func(_, _ string) {}
 	}
-	return cb
+
+	return tui.AppConfig{
+		Session: session.Config{
+			WorkDuration:       time.Duration(*work) * time.Minute,
+			ShortBreakDuration: time.Duration(*brk) * time.Minute,
+			LongBreakDuration:  time.Duration(*longBrk) * time.Minute,
+			Rounds:             *rounds,
+		},
+		Callbacks:      cb,
+		ConfirmEnabled: !*noConfirm,
+	}
 }

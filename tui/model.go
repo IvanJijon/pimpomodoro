@@ -37,29 +37,36 @@ func DefaultCallbacks() Callbacks {
 	}
 }
 
+// AppConfig holds all configuration for the application.
+type AppConfig struct {
+	Session        session.Config
+	Callbacks      Callbacks
+	ConfirmEnabled bool
+}
+
 // Model holds the application state.
 type Model struct {
-	session       session.Session
-	spinner       spinner.Model
-	remainingTime time.Duration
-	running       bool
-	viewMode      ViewMode
-	tickID        int
-	width         int
-	height        int
+	session        session.Session
+	spinner        spinner.Model
+	remainingTime  time.Duration
+	running        bool
+	viewMode       ViewMode
+	tickID         int
+	width          int
+	height         int
 	confirmEnabled bool
 
 	// not model but injected callbacks for side effects
 	callbacks Callbacks
 }
 
-// NewModel returns a Model with default session and UI.
-func NewModel(cfg session.Config, cb Callbacks) Model {
+// NewModel returns a Model with the given application configuration.
+func NewModel(cfg AppConfig) Model {
 	return Model{
-		session:        session.NewSession(cfg),
+		session:        session.NewSession(cfg.Session),
 		spinner:        newSpinner(),
-		callbacks:      cb,
-		confirmEnabled: true,
+		callbacks:      cfg.Callbacks,
+		confirmEnabled: cfg.ConfirmEnabled,
 	}
 }
 

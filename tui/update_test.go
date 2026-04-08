@@ -10,11 +10,14 @@ import (
 )
 
 func newTestModel() Model {
-	cb := Callbacks{
-		PlayAlarm:  func() {},            // no-op
-		SendNotify: func(_, _ string) {}, // no-op
-	}
-	return NewModel(session.DefaultConfig(), cb)
+	return NewModel(AppConfig{
+		Session: session.DefaultConfig(),
+		Callbacks: Callbacks{
+			PlayAlarm:  func() {},
+			SendNotify: func(_, _ string) {},
+		},
+		ConfirmEnabled: true,
+	})
 }
 
 func TestUpdateTick(t *testing.T) {
