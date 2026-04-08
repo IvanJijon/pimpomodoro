@@ -107,7 +107,7 @@ func (m Model) updateQuitConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	switch msg.String() {
 	case "y":
 		return m, tea.Quit
-	case "x":
+	case "n":
 		m.viewMode = ModeNormal
 		if m.session.CurrentPhase != session.Idle {
 			m.running = true
@@ -125,7 +125,7 @@ func (m Model) updateSkipConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.session.NextPhase()
 		m.remainingTime = m.session.PhaseDuration()
 		m.viewMode = ModeNormal
-	case "x":
+	case "n":
 		m.viewMode = ModeNormal
 		m.running = true
 		m.tickID++
@@ -147,7 +147,7 @@ func (m Model) updateResetConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.remainingTime = m.session.PhaseDuration()
 		m.viewMode = ModeNormal
 		return m, nil
-	case "x":
+	case "n":
 		m.viewMode = ModeNormal
 		m.running = true
 		m.tickID++

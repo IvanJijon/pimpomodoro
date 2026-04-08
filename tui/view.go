@@ -68,13 +68,13 @@ func (m Model) View() string {
 
 	switch m.viewMode {
 	case ModeSkipConfirm:
-		dialog := dialogStyle.Render("Skip to next phase?\n\n(y) confirm  (x) cancel")
+		dialog := dialogStyle.Render("Skip to next phase?\n\n(y) confirm  (n) cancel")
 		s += "\n" + centerStyle.Render(dialog) + "\n"
 	case ModeQuitConfirm:
-		dialog := dialogStyle.Render("Quit?\n\n(y) confirm  (x) cancel")
+		dialog := dialogStyle.Render("Quit?\n\n(y) confirm  (n) cancel")
 		s += "\n" + centerStyle.Render(dialog) + "\n"
 	case ModeResetConfirm:
-		dialog := dialogStyle.Render("Reset current phase?\n\n(y) confirm  (x) cancel")
+		dialog := dialogStyle.Render("Reset current phase?\n\n(y) confirm  (n) cancel")
 		s += "\n" + centerStyle.Render(dialog) + "\n"
 	case ModeNormal:
 		s += "\n" + footerStyle.Render("(?) help  (q) quit") + "\n"

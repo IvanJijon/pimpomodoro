@@ -220,13 +220,13 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantViewMode:      ModeNormal,
 		},
 		{
-			name: "pressing x during reset confirmation cancels and resumes",
+			name: "pressing n during reset confirmation cancels and resumes",
 			setup: func(m *Model) {
 				m.session.CurrentPhase = session.Work
 				m.remainingTime = 12 * time.Minute
 				m.viewMode = ModeResetConfirm
 			},
-			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}},
 			wantPhase:         session.Work,
 			wantRemainingTime: 12 * time.Minute,
 			wantRunning:       true,
@@ -261,14 +261,14 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantViewMode:      ModeNormal,
 		},
 		{
-			name: "pressing x during confirm skip cancels and resumes",
+			name: "pressing n during confirm skip cancels and resumes",
 			setup: func(m *Model) {
 				m.session.CurrentPhase = session.Work
 				m.session.CurrentPomodoro = 1
 				m.remainingTime = 12 * time.Minute
 				m.viewMode = ModeSkipConfirm
 			},
-			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}},
 			wantPhase:         session.Work,
 			wantRemainingTime: 12 * time.Minute,
 			wantRunning:       true,
@@ -328,24 +328,24 @@ func TestUpdateKeyMsg(t *testing.T) {
 			wantViewMode:      ModeQuitConfirm,
 		},
 		{
-			name: "pressing x during quit confirmation cancels and resumes",
+			name: "pressing n during quit confirmation cancels and resumes",
 			setup: func(m *Model) {
 				m.session.CurrentPhase = session.Work
 				m.remainingTime = 12 * time.Minute
 				m.viewMode = ModeQuitConfirm
 			},
-			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}},
+			msg:               tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}},
 			wantPhase:         session.Work,
 			wantRemainingTime: 12 * time.Minute,
 			wantRunning:       true,
 			wantViewMode:      ModeNormal,
 		},
 		{
-			name: "pressing x during quit confirmation while Idle stays Idle",
+			name: "pressing n during quit confirmation while Idle stays Idle",
 			setup: func(m *Model) {
 				m.viewMode = ModeQuitConfirm
 			},
-			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}},
+			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}},
 			wantPhase:    session.Idle,
 			wantRunning:  false,
 			wantViewMode: ModeNormal,
