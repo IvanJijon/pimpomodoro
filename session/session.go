@@ -2,15 +2,6 @@ package session
 
 import "time"
 
-type Phase int
-
-const (
-	Idle Phase = iota
-	Work
-	ShortBreak
-	LongBreak
-)
-
 type Session struct {
 	WorkDuration       time.Duration
 	ShortBreakDuration time.Duration
