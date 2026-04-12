@@ -16,6 +16,13 @@ type Task struct {
 }
 
 func NewTask(name string, estimatedPomos int) *Task {
+	if name == "" {
+		name = "Untitled"
+	}
+	if estimatedPomos <= 0 {
+		estimatedPomos = 1
+	}
+	
 	return &Task{
 		Name:           name,
 		EstimatedPomos: estimatedPomos,

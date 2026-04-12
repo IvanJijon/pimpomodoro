@@ -7,6 +7,7 @@ func TestNewTask(t *testing.T) {
 		name           string
 		taskName       string
 		estimatedPomos int
+		wantName       string
 		wantStatus     Status
 		wantActual     int
 		wantEstimate   int
@@ -15,6 +16,7 @@ func TestNewTask(t *testing.T) {
 			name:           "new task has pending status and zero actual pomodoros",
 			taskName:       "Write tests",
 			estimatedPomos: 3,
+			wantName:       "Write tests",
 			wantStatus:     Pending,
 			wantActual:     0,
 			wantEstimate:   3,
@@ -23,6 +25,7 @@ func TestNewTask(t *testing.T) {
 			name:           "negative estimate defaults to 1",
 			taskName:       "Write tests",
 			estimatedPomos: -3,
+			wantName:       "Write tests",
 			wantStatus:     Pending,
 			wantActual:     0,
 			wantEstimate:   1,
@@ -31,9 +34,19 @@ func TestNewTask(t *testing.T) {
 			name:           "zero estimate defaults to 1",
 			taskName:       "Write tests",
 			estimatedPomos: 0,
+			wantName:       "Write tests",
 			wantStatus:     Pending,
 			wantActual:     0,
 			wantEstimate:   1,
+		},
+		{
+			name:           "empty name defaults to Untitled",
+			taskName:       "",
+			estimatedPomos: 3,
+			wantName:       "Untitled",
+			wantStatus:     Pending,
+			wantActual:     0,
+			wantEstimate:   3,
 		},
 	}
 
@@ -41,8 +54,8 @@ func TestNewTask(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			task := NewTask(tt.taskName, tt.estimatedPomos)
 
-			if task.Name != tt.taskName {
-				t.Errorf("Name = %q, want %q", task.Name, tt.taskName)
+			if task.Name != tt.wantName {
+				t.Errorf("Name = %q, want %q", task.Name, tt.wantName)
 			}
 			if task.EstimatedPomos != tt.wantEstimate {
 				t.Errorf("EstimatedPomos = %d, want %d", task.EstimatedPomos, tt.wantEstimate)
