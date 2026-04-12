@@ -12,10 +12,13 @@ pimpomodoro/
 ├── session/             Domain logic — session config, phase state machine
 │   ├── session.go       Session, Config, state machine
 │   └── phase.go         Phase type and constants
+├── task/                Task domain model
+│   ├── task.go          Task entity: status, pomodoros, state transitions
+│   └── tasklist.go      TaskList aggregate root: add, remove, select WIP, mark done, sort
 ├── tui/                 Terminal UI — Bubble Tea model, update, view
 │   ├── model.go         Model struct, AppConfig, Callbacks, ViewMode, NewModel, Init
 │   ├── update.go        Update dispatcher (thin router to handlers)
-│   ├── handle_key.go    Key handlers per view mode
+│   ├── handle_key.go    Global key handling (q, ctrl-c) + per-mode key handlers
 │   ├── handle_tick.go   Window size, spinner tick, timer tick handlers
 │   ├── handle_blink.go  Visual alert blink handler
 │   ├── tick.go          TickMsg and tickCmd (1s interval)
@@ -50,6 +53,29 @@ Idle → Work → ShortBreak → Work → ShortBreak → ... → Work → LongBr
 - `PreviousPhase()` moves back (no-op at `Work #1` and `Idle`)
 - `PhaseDuration()` returns the duration for the current phase
 
+## Task
+
+The `task` package contains the task domain model, independent of UI.
+
+### Task (Entity)
+
+Fields: Name, EstimatedPomos, ActualPomos, Status (Pending/InProgress/Done)
+
+State transitions:
+- `StartWork()` — Pending → InProgress
+- `StopWork()` — InProgress → Pending
+- `MarkDone()` — InProgress → Done
+- `IncreaseActualPomos()` — increments count (only when InProgress)
+
+### TaskList (Aggregate Root)
+
+Ordered collection of `*Task` with invariant: only one task can be InProgress at a time.
+
+- `Add(*Task)`, `Remove(*Task)`, `Len()`, `Tasks()`, `CurrentWIP()`
+- `SelectWIP(*Task)` — starts task, stops previous WIP, re-sorts
+- `MarkTaskDone(*Task)` — marks done, re-sorts (validates membership)
+- Sort order: InProgress → Pending → Done (via `statusPriority` map)
+
 ## TUI
 
 The `tui` package implements the Bubble Tea application using the Elm Architecture:
@@ -70,20 +96,24 @@ The `tui` package implements the Bubble Tea application using the Elm Architectu
 | `BlinkMsg` | `handle_blink.go` | `handleBlink` |
 | `tea.KeyMsg` | `handle_key.go` | `handleKey` → per-mode handlers |
 
+### Global Key Handling
+
+`handleKey` processes these before dispatching to mode-specific handlers:
+- `ctrl-c` — force quit from any mode
+- `q` — quit with confirmation from any mode except ModeTaskAdd
+
 ### View Modes
 
-The UI uses a `ViewMode` to determine which screen is active and which keys are handled:
-
-| Mode | Description |
-|------|-------------|
-| `ModeNormal` | Main timer screen |
-| `ModeHelp` | Keybindings help screen |
-| `ModeSkipConfirm` | Skip phase confirmation dialog |
-| `ModeResetConfirm` | Reset phase confirmation dialog |
-| `ModePreviousConfirm` | Previous phase confirmation dialog |
-| `ModeQuitConfirm` | Quit confirmation dialog |
-
-Each mode has its own key handler in `handle_key.go`.
+| Mode | Description | Back key |
+|------|-------------|----------|
+| `ModeNormal` | Main timer screen | — |
+| `ModeHelp` | Keybindings help | `?` or `esc` |
+| `ModeTaskList` | Task list with navigation | `t` or `esc` |
+| `ModeTaskAdd` | Add task form (text inputs) | `esc` |
+| `ModeSkipConfirm` | Skip phase confirmation | `n` or `esc` |
+| `ModeResetConfirm` | Reset phase confirmation | `n` or `esc` |
+| `ModePreviousConfirm` | Previous phase confirmation | `n` or `esc` |
+| `ModeQuitConfirm` | Quit confirmation | `n` or `esc` |
 
 ### Timer
 
@@ -104,13 +134,38 @@ Accessibility feature for users with hearing difficulties. Enabled via `--visual
 - View applies phase-colored background to the entire terminal when `alerting && blinkState`
 - Any keypress dismisses the alert (cleared at top of `handleKey`)
 
+### Task List UI
+
+Keybindings in ModeTaskList:
+- `↑`/`↓` or `j`/`k` — navigate
+- `enter` — select task at cursor as WIP
+- `d` — mark task at cursor as done
+- `x` — remove task at cursor
+- `a` — enter ModeTaskAdd
+- `esc` or `t` — back to ModeNormal
+
+Task display: `│ 0/3  │ ⬜ Task name` with dynamic truncation based on `viewWidth`.
+
+### Task Add UI
+
+Two `bubbles/textinput` fields:
+- Name (50 char limit, `│` prompt, underlined)
+- Estimate (2 char limit, `│` prompt, underlined)
+- `tab` switches focus between inputs
+- `enter` confirms (empty name rejected, invalid estimate defaults to 1)
+- `esc` cancels
+
+### Normal Mode WIP Display
+
+When a task is InProgress, normal mode shows it below the timer: `🔧 Task name [actual/estimated]`
+
 ### Confirmation Dialogs
 
 Skip, reset, previous, and quit all follow the same pattern:
 1. Key press → set `viewMode` to confirm mode, pause timer
 2. View shows dialog with `(y) confirm  (n) cancel`
 3. `y` → execute action
-4. `n` → cancel, resume timer
+4. `n` or `esc` → cancel, resume timer
 
 Confirmations can be disabled globally via `--no-confirm` flag.
 
@@ -124,6 +179,8 @@ UI styling uses [Lipgloss](https://github.com/charmbracelet/lipgloss) with phase
 | Short Break | Turquoise |
 | Long Break | Deep Blue |
 | Paused | Yellow |
+
+View width is 65 chars. All content is centered in the terminal via `lipgloss.Place`. Task list and help text are left-aligned within the centered block.
 
 ## Sound & Notifications
 
