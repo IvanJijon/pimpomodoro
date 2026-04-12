@@ -39,6 +39,8 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleKeyTaskList(msg)
 	case ModeTaskAdd:
 		return m.handleKeyTaskAdd(msg)
+	case ModeSwitchTaskConfirm:
+		return m.handleKeySwitchTaskConfirm(msg)
 	case ModeHelp:
 		return m.handleKeyHelp(msg)
 	default:
@@ -145,7 +147,32 @@ func (m Model) handleKeyTaskList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if m.taskList.Len() == 0 {
 			return m, nil
 		}
+		current := m.taskList.CurrentWIP()
+		selected := m.taskList.Tasks()[m.taskCursor]
+		if current == selected {
+			return m, nil
+		}
+		if m.session.CurrentPhase != session.Idle {
+			m.viewMode = ModeSwitchTaskConfirm
+			return m, nil
+		}
+		m.taskList.SelectWIP(selected)
+	}
+	return m, nil
+}
+
+// handleKeySwitchTaskConfirm processes key presses in the switch task confirmation dialog.
+func (m Model) handleKeySwitchTaskConfirm(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case "y":
 		m.taskList.SelectWIP(m.taskList.Tasks()[m.taskCursor])
+		m.remainingTime = m.session.PhaseDuration()
+		m.running = false
+		m.viewMode = ModeTaskList
+		return m, nil
+	case "n", tea.KeyEsc.String():
+		m.viewMode = ModeTaskList
+		return m, nil
 	}
 	return m, nil
 }

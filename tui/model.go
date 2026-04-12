@@ -26,6 +26,7 @@ const (
 	ModePreviousConfirm
 	ModeTaskList
 	ModeTaskAdd
+	ModeSwitchTaskConfirm
 )
 
 // Callbacks holds external side-effect functions injected into the model.

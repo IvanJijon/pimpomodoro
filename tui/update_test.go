@@ -1123,3 +1123,192 @@ func TestWorkPhaseCompletionIncrementsWIPPomos(t *testing.T) {
 	}
 }
 
+func TestTaskSwitchConfirmation(t *testing.T) {
+	tests := []struct {
+		name         string
+		setup        func(*Model)
+		msg          tea.Msg
+		wantViewMode ViewMode
+		wantWIPName  string
+	}{
+		{
+			name: "pressing enter while timer running shows switch confirmation",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskList
+				m.running = true
+				m.session.CurrentPhase = session.Work
+				first := task.NewTask("First", 1)
+				second := task.NewTask("Second", 2)
+				m.taskList.Add(first)
+				m.taskList.Add(second)
+				m.taskList.SelectWIP(first)
+				m.taskCursor = 1
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyEnter},
+			wantViewMode: ModeSwitchTaskConfirm,
+			wantWIPName:  "First",
+		},
+		{
+			name: "pressing enter while timer not running switches directly when Idle",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskList
+				m.running = false
+				first := task.NewTask("First", 1)
+				second := task.NewTask("Second", 2)
+				m.taskList.Add(first)
+				m.taskList.Add(second)
+				m.taskList.SelectWIP(first)
+				m.taskCursor = 1
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyEnter},
+			wantViewMode: ModeTaskList,
+			wantWIPName:  "Second",
+		},
+		{
+			name: "pressing enter while timer paused shows switch confirmation",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskList
+				m.running = false
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 12 * time.Minute
+				first := task.NewTask("First", 1)
+				second := task.NewTask("Second", 2)
+				m.taskList.Add(first)
+				m.taskList.Add(second)
+				m.taskList.SelectWIP(first)
+				m.taskCursor = 1
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyEnter},
+			wantViewMode: ModeSwitchTaskConfirm,
+			wantWIPName:  "First",
+		},
+		{
+			name: "pressing enter on already WIP task while running is a no-op",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskList
+				m.running = true
+				m.session.CurrentPhase = session.Work
+				first := task.NewTask("First", 1)
+				m.taskList.Add(first)
+				m.taskList.SelectWIP(first)
+				m.taskCursor = 0
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyEnter},
+			wantViewMode: ModeTaskList,
+			wantWIPName:  "First",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := newTestModel()
+			if tt.setup != nil {
+				tt.setup(&m)
+			}
+
+			updated, _ := m.Update(tt.msg)
+			model := updated.(Model)
+
+			if model.viewMode != tt.wantViewMode {
+				t.Errorf("viewMode = %v, want %v", model.viewMode, tt.wantViewMode)
+			}
+			wip := model.taskList.CurrentWIP()
+			if wip == nil {
+				t.Fatal("CurrentWIP() = nil, want a task")
+			}
+			if wip.Name != tt.wantWIPName {
+				t.Errorf("CurrentWIP().Name = %q, want %q", wip.Name, tt.wantWIPName)
+			}
+		})
+	}
+}
+
+func TestSwitchTaskConfirmDialog(t *testing.T) {
+	tests := []struct {
+		name         string
+		setup        func(*Model)
+		msg          tea.Msg
+		wantViewMode ViewMode
+		wantWIPName  string
+		wantRunning  bool
+	}{
+		{
+			name: "pressing y confirms task switch and resets timer",
+			setup: func(m *Model) {
+				m.viewMode = ModeSwitchTaskConfirm
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 12 * time.Minute
+				first := task.NewTask("First", 1)
+				second := task.NewTask("Second", 2)
+				m.taskList.Add(first)
+				m.taskList.Add(second)
+				m.taskList.SelectWIP(first)
+				m.taskCursor = 1
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'y'}},
+			wantViewMode: ModeTaskList,
+			wantWIPName:  "Second",
+			wantRunning:  false,
+		},
+		{
+			name: "pressing n cancels task switch",
+			setup: func(m *Model) {
+				m.viewMode = ModeSwitchTaskConfirm
+				m.session.CurrentPhase = session.Work
+				first := task.NewTask("First", 1)
+				second := task.NewTask("Second", 2)
+				m.taskList.Add(first)
+				m.taskList.Add(second)
+				m.taskList.SelectWIP(first)
+				m.taskCursor = 1
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'n'}},
+			wantViewMode: ModeTaskList,
+			wantWIPName:  "First",
+			wantRunning:  false,
+		},
+		{
+			name: "pressing esc cancels task switch",
+			setup: func(m *Model) {
+				m.viewMode = ModeSwitchTaskConfirm
+				m.session.CurrentPhase = session.Work
+				first := task.NewTask("First", 1)
+				second := task.NewTask("Second", 2)
+				m.taskList.Add(first)
+				m.taskList.Add(second)
+				m.taskList.SelectWIP(first)
+				m.taskCursor = 1
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyEsc},
+			wantViewMode: ModeTaskList,
+			wantWIPName:  "First",
+			wantRunning:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := newTestModel()
+			if tt.setup != nil {
+				tt.setup(&m)
+			}
+
+			updated, _ := m.Update(tt.msg)
+			model := updated.(Model)
+
+			if model.viewMode != tt.wantViewMode {
+				t.Errorf("viewMode = %v, want %v", model.viewMode, tt.wantViewMode)
+			}
+			wip := model.taskList.CurrentWIP()
+			if wip == nil {
+				t.Fatal("CurrentWIP() = nil, want a task")
+			}
+			if wip.Name != tt.wantWIPName {
+				t.Errorf("CurrentWIP().Name = %q, want %q", wip.Name, tt.wantWIPName)
+			}
+			if model.running != tt.wantRunning {
+				t.Errorf("running = %v, want %v", model.running, tt.wantRunning)
+			}
+		})
+	}
+}

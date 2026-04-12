@@ -76,6 +76,10 @@ func (m Model) View() string {
 		}
 		s += "\n" + footerStyle.Render("(a) add  (enter) select  (d) done") + "\n"
 		s += footerStyle.Render("(x) remove  (esc) back") + "\n"
+	} else if m.viewMode == ModeSwitchTaskConfirm {
+		s += "\n" + centerStyle.Render("Task List") + "\n\n"
+		dialog := dialogStyle.Render("Timer will be reset, switch task?\n\n(y) confirm  (n) cancel")
+		s += "\n" + centerStyle.Render(dialog) + "\n"
 	} else if m.viewMode == ModeTaskAdd {
 		s += "\n" + centerStyle.Render("Add Task") + "\n\n"
 		form := "  Name:     " + m.taskNameInput.View() + "\n"
