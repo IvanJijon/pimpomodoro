@@ -22,7 +22,7 @@ func NewTask(name string, estimatedPomos int) *Task {
 	if estimatedPomos <= 0 {
 		estimatedPomos = 1
 	}
-	
+
 	return &Task{
 		Name:           name,
 		EstimatedPomos: estimatedPomos,
