@@ -119,7 +119,6 @@ func (m Model) View() string {
 		}
 	}
 
-
 	if m.width > 0 && m.height > 0 {
 		if m.alerting && m.blinkState {
 			borderStyle := lipgloss.NewStyle().

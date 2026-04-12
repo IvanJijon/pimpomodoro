@@ -15,12 +15,12 @@ import (
 var (
 	version = "dev"
 
-	work      = flag.Int("work", 25, "work duration in minutes")
-	brk       = flag.Int("break", 5, "short break duration in minutes")
-	longBrk   = flag.Int("long-break", 15, "long break duration in minutes")
-	rounds    = flag.Int("rounds", 4, "number of pomodoros before long break")
-	noSound   = flag.Bool("no-sound", false, "disable alarm sound")
-	noNotify  = flag.Bool("no-notify", false, "disable desktop notifications")
+	work          = flag.Int("work", 25, "work duration in minutes")
+	brk           = flag.Int("break", 5, "short break duration in minutes")
+	longBrk       = flag.Int("long-break", 15, "long break duration in minutes")
+	rounds        = flag.Int("rounds", 4, "number of pomodoros before long break")
+	noSound       = flag.Bool("no-sound", false, "disable alarm sound")
+	noNotify      = flag.Bool("no-notify", false, "disable desktop notifications")
 	noConfirm     = flag.Bool("no-confirm", false, "disable confirmation dialogs")
 	noVisualAlert = flag.Bool("no-visual-alert", false, "disable visual alert (blinking) when timer expires")
 	showVer       = flag.Bool("version", false, "print version and exit")
