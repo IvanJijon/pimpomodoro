@@ -21,9 +21,9 @@ var (
 	rounds    = flag.Int("rounds", 4, "number of pomodoros before long break")
 	noSound   = flag.Bool("no-sound", false, "disable alarm sound")
 	noNotify  = flag.Bool("no-notify", false, "disable desktop notifications")
-	noConfirm   = flag.Bool("no-confirm", false, "disable confirmation dialogs")
-	visualAlert = flag.Bool("visual-alert", false, "enable visual alert (blinking) when timer expires")
-	showVer     = flag.Bool("version", false, "print version and exit")
+	noConfirm     = flag.Bool("no-confirm", false, "disable confirmation dialogs")
+	noVisualAlert = flag.Bool("no-visual-alert", false, "disable visual alert (blinking) when timer expires")
+	showVer       = flag.Bool("version", false, "print version and exit")
 )
 
 func main() {
@@ -59,6 +59,6 @@ func parseAppConfig() tui.AppConfig {
 		},
 		Callbacks:      cb,
 		ConfirmEnabled: !*noConfirm,
-		VisualAlert:    *visualAlert,
+		VisualAlert:    !*noVisualAlert,
 	}
 }
