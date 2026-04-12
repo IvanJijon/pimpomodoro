@@ -111,9 +111,11 @@ func (m Model) View() string {
 			dialog := dialogStyle.Render("Go to previous phase?\n\n(y) confirm  (n) cancel")
 			s += "\n" + centerStyle.Render(dialog) + "\n"
 		case ModeNormal:
-			s += "\n" + footerStyle.Render("(?) help  (t) tasks  (q) quit") + "\n"
+			s += "\n" + footerStyle.Render(configSummary(m)) + "\n"
+			s += footerStyle.Render("(?) help  (t) tasks  (q) quit") + "\n"
 		default:
-			s += "\n" + footerStyle.Render("(?) help  (t) tasks  (q) quit") + "\n"
+			s += "\n" + footerStyle.Render(configSummary(m)) + "\n"
+			s += footerStyle.Render("(?) help  (t) tasks  (q) quit") + "\n"
 		}
 	}
 
@@ -177,6 +179,14 @@ func phaseTimerStyle(m Model) lipgloss.Style {
 
 func wipLabel(wip *task.Task) string {
 	return fmt.Sprintf("\U0001f527 %s [%d/%d]", wip.Name, wip.ActualPomos, wip.EstimatedPomos)
+}
+
+func configSummary(m Model) string {
+	w := int(m.session.WorkDuration.Minutes())
+	s := int(m.session.ShortBreakDuration.Minutes())
+	l := int(m.session.LongBreakDuration.Minutes())
+	r := m.session.Rounds
+	return fmt.Sprintf("w:%d  b:%d  lb:%d  rounds:%d", w, s, l, r)
 }
 
 func taskLine(t *task.Task) string {
