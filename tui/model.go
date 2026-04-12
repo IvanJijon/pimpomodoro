@@ -87,9 +87,9 @@ type Model struct {
 func NewModel(cfg AppConfig) Model {
 	estimation := func() textinput.Model {
 		ti := textinput.New()
-		ti.Placeholder = "number of pomodoros"
+		ti.Placeholder = "1"
 		ti.CharLimit = 2
-		ti.Width = 20
+		ti.Width = 2
 		ti.Prompt = "│ "
 		ti.TextStyle = lipgloss.NewStyle().Underline(true)
 		return ti
