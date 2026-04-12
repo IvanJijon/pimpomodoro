@@ -5,6 +5,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+
+	"github.com/IvanJijon/pimpomodoro/session"
 )
 
 // handleWindowSize stores the terminal dimensions when the window is resized.
@@ -30,6 +32,11 @@ func (m Model) handleTick(msg TickMsg) (tea.Model, tea.Cmd) {
 		return m, nil
 	}
 	if m.remainingTime <= 0 {
+		if m.session.CurrentPhase == session.Work {
+			if tsk := m.taskList.CurrentWIP(); tsk != nil {
+				tsk.IncreaseActualPomos()
+			}
+		}
 		notifyMsg := phaseCompleteMessage(m.session.CurrentPhase)
 		if m.visualAlert {
 			m.alertColor = phaseColor(m)

@@ -1050,3 +1050,76 @@ func TestTaskAddEmptyName(t *testing.T) {
 		t.Errorf("viewMode = %v, want %v", model.viewMode, ModeTaskAdd)
 	}
 }
+
+func TestWorkPhaseCompletionIncrementsWIPPomos(t *testing.T) {
+	tests := []struct {
+		name       string
+		setup      func(*Model)
+		msg        tea.Msg
+		wantActual int
+	}{
+		{
+			name: "Work phase completion increments WIP task actual pomodoros",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 0
+				m.running = true
+				wip := task.NewTask("Write tests", 3)
+				m.taskList.Add(wip)
+				m.taskList.SelectWIP(wip)
+			},
+			msg:        TickMsg{},
+			wantActual: 1,
+		},
+		{
+			name: "ShortBreak phase completion does not increment WIP task",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.ShortBreak
+				m.remainingTime = 0
+				m.running = true
+				wip := task.NewTask("Write tests", 3)
+				m.taskList.Add(wip)
+				m.taskList.SelectWIP(wip)
+			},
+			msg:        TickMsg{},
+			wantActual: 0,
+		},
+		{
+			name: "Work phase completion with no WIP task does not panic",
+			setup: func(m *Model) {
+				m.session.CurrentPhase = session.Work
+				m.remainingTime = 0
+				m.running = true
+			},
+			msg:        TickMsg{},
+			wantActual: -1,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := newTestModel()
+			if tt.setup != nil {
+				tt.setup(&m)
+			}
+
+			updated, _ := m.Update(tt.msg)
+			model := updated.(Model)
+
+			wip := model.taskList.CurrentWIP()
+			if tt.wantActual == -1 {
+				if wip != nil {
+					t.Errorf("CurrentWIP() = %q, want nil", wip.Name)
+				}
+				return
+			}
+			if wip == nil {
+				t.Fatal("CurrentWIP() = nil, want a task")
+			}
+			if wip.ActualPomos != tt.wantActual {
+				t.Errorf("ActualPomos = %d, want %d", wip.ActualPomos, tt.wantActual)
+			}
+		})
+	}
+}
+
