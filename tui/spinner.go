@@ -6,12 +6,23 @@ import (
 )
 
 func newSpinner() spinner.Model {
-	s := spinner.New()
-
-	s.Spinner = spinner.Dot
-	s.Style = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("#C15C5C"))
+	s := spinner.New(WithDot(), WithStyle())
 
 	return s
+}
+
+// WithDot returns a spinner option that sets the spinner to the "Dot" style.
+func WithDot() spinner.Option {
+	return func(m *spinner.Model) {
+		m.Spinner = spinner.Dot
+	}
+}
+
+// WithStyle returns a spinner option that applies a custom style to the spinner.
+func WithStyle() spinner.Option {
+	return func(m *spinner.Model) {
+		m.Style = lipgloss.NewStyle().
+			Bold(true).
+			Foreground(lipgloss.Color("#C15C5C"))
+	}
 }
