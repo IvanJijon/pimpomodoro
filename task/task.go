@@ -24,6 +24,18 @@ func NewTask(name string, estimatedPomos int) *Task {
 	}
 }
 
+func (t *Task) Edit(name string, estimatedPomos int) *Task {
+	if name == "" {
+		return t
+	}
+	if estimatedPomos <= 0 {
+		estimatedPomos = 1
+	}
+	t.Name = name
+	t.EstimatedPomos = estimatedPomos
+	return t
+}
+
 func (t *Task) StartWork() {
 	if t.Status == Pending {
 		t.Status = InProgress

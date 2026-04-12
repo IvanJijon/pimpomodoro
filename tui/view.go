@@ -74,14 +74,18 @@ func (m Model) View() string {
 			}
 			s += lipgloss.NewStyle().Width(viewWidth).Render(list)
 		}
-		s += "\n" + footerStyle.Render("(a) add  (enter) select  (d) done") + "\n"
+		s += "\n" + footerStyle.Render("(a) add  (e) edit  (enter) select  (d) done") + "\n"
 		s += footerStyle.Render("(x) remove  (esc) back") + "\n"
 	} else if m.viewMode == ModeSwitchTaskConfirm {
 		s += "\n" + centerStyle.Render("Task List") + "\n\n"
 		dialog := dialogStyle.Render("Timer will be reset, switch task?\n\n(y) confirm  (n) cancel")
 		s += "\n" + centerStyle.Render(dialog) + "\n"
-	} else if m.viewMode == ModeTaskAdd {
-		s += "\n" + centerStyle.Render("Add Task") + "\n\n"
+	} else if m.viewMode == ModeTaskAdd || m.viewMode == ModeTaskEdit {
+		title := "Add Task"
+		if m.viewMode == ModeTaskEdit {
+			title = "Edit Task"
+		}
+		s += "\n" + centerStyle.Render(title) + "\n\n"
 		form := "  Name:     " + m.taskNameInput.View() + "\n"
 		form += "  Estimate: " + m.taskEstimateInput.View() + "\n"
 		s += lipgloss.NewStyle().Width(viewWidth).Render(form)

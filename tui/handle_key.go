@@ -39,6 +39,8 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		return m.handleKeyTaskList(msg)
 	case ModeTaskAdd:
 		return m.handleKeyTaskAdd(msg)
+	case ModeTaskEdit:
+		return m.handleKeyTaskEdit(msg)
 	case ModeSwitchTaskConfirm:
 		return m.handleKeySwitchTaskConfirm(msg)
 	case ModeHelp:
@@ -118,6 +120,14 @@ func (m Model) handleKeyTaskList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.viewMode = ModeTaskAdd
 		m.taskNameInput.Focus()
 		return m, nil
+	case "e":
+		if m.taskList.Len() == 0 {
+			return m, nil
+		}
+		m.viewMode = ModeTaskEdit
+		m.taskNameInput.SetValue(m.taskList.Tasks()[m.taskCursor].Name)
+		m.taskEstimateInput.SetValue(strconv.Itoa(m.taskList.Tasks()[m.taskCursor].EstimatedPomos))
+		return m, nil
 	case "up", "k":
 		if m.taskCursor > 0 {
 			m.taskCursor--
@@ -195,6 +205,48 @@ func (m Model) handleKeyTaskAdd(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 			estimate = 1
 		}
 		m.taskList.Add(task.NewTask(name, estimate))
+		m.taskNameInput.SetValue("")
+		m.taskEstimateInput.SetValue("")
+		m.viewMode = ModeTaskList
+		return m, nil
+	case tea.KeyTab.String():
+		if m.taskNameInput.Focused() {
+			m.taskNameInput.Blur()
+			m.taskEstimateInput.Focus()
+		} else {
+			m.taskEstimateInput.Blur()
+			m.taskNameInput.Focus()
+		}
+		return m, nil
+	}
+	var cmd tea.Cmd
+	if m.taskNameInput.Focused() {
+		m.taskNameInput, cmd = m.taskNameInput.Update(msg)
+	} else {
+		m.taskEstimateInput, cmd = m.taskEstimateInput.Update(msg)
+	}
+	return m, cmd
+}
+
+// handleKeyTaskEdit processes key presses in task edit mode.
+func (m Model) handleKeyTaskEdit(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	switch msg.String() {
+	case tea.KeyEsc.String():
+		m.taskNameInput.SetValue("")
+		m.taskEstimateInput.SetValue("")
+		m.viewMode = ModeTaskList
+		return m, nil
+	case tea.KeyEnter.String():
+		name := m.taskNameInput.Value()
+		if name == "" {
+			return m, nil
+		}
+		estimate, err := strconv.Atoi(m.taskEstimateInput.Value())
+		if err != nil || estimate <= 0 {
+			estimate = 1
+		}
+		tsk := m.taskList.Tasks()[m.taskCursor]
+		tsk.Edit(name, estimate)
 		m.taskNameInput.SetValue("")
 		m.taskEstimateInput.SetValue("")
 		m.viewMode = ModeTaskList

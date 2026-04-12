@@ -9,6 +9,7 @@ func TestNewTask(t *testing.T) {
 		estimatedPomos int
 		wantStatus     Status
 		wantActual     int
+		wantEstimate   int
 	}{
 		{
 			name:           "new task has pending status and zero actual pomodoros",
@@ -16,6 +17,23 @@ func TestNewTask(t *testing.T) {
 			estimatedPomos: 3,
 			wantStatus:     Pending,
 			wantActual:     0,
+			wantEstimate:   3,
+		},
+		{
+			name:           "negative estimate defaults to 1",
+			taskName:       "Write tests",
+			estimatedPomos: -3,
+			wantStatus:     Pending,
+			wantActual:     0,
+			wantEstimate:   1,
+		},
+		{
+			name:           "zero estimate defaults to 1",
+			taskName:       "Write tests",
+			estimatedPomos: 0,
+			wantStatus:     Pending,
+			wantActual:     0,
+			wantEstimate:   1,
 		},
 	}
 
@@ -26,8 +44,8 @@ func TestNewTask(t *testing.T) {
 			if task.Name != tt.taskName {
 				t.Errorf("Name = %q, want %q", task.Name, tt.taskName)
 			}
-			if task.EstimatedPomos != tt.estimatedPomos {
-				t.Errorf("EstimatedPomos = %d, want %d", task.EstimatedPomos, tt.estimatedPomos)
+			if task.EstimatedPomos != tt.wantEstimate {
+				t.Errorf("EstimatedPomos = %d, want %d", task.EstimatedPomos, tt.wantEstimate)
 			}
 			if task.Status != tt.wantStatus {
 				t.Errorf("Status = %v, want %v", task.Status, tt.wantStatus)
@@ -210,6 +228,72 @@ func TestTaskStopWork(t *testing.T) {
 
 			if task.Status != tt.wantStatus {
 				t.Errorf("Status = %v, want %v", task.Status, tt.wantStatus)
+			}
+		})
+	}
+}
+
+func TestTaskEdit(t *testing.T) {
+	tests := []struct {
+		name         string
+		setup        func() *Task
+		editName     string
+		editEstimate int
+		wantName     string
+		wantEstimate int
+	}{
+		{
+			name: "edit updates name and estimate",
+			setup: func() *Task {
+				return NewTask("Old name", 3)
+			},
+			editName:     "New name",
+			editEstimate: 5,
+			wantName:     "New name",
+			wantEstimate: 5,
+		},
+		{
+			name: "edit with negative estimate defaults to 1",
+			setup: func() *Task {
+				return NewTask("Old name", 3)
+			},
+			editName:     "New name",
+			editEstimate: -2,
+			wantName:     "New name",
+			wantEstimate: 1,
+		},
+		{
+			name: "edit with zero estimate defaults to 1",
+			setup: func() *Task {
+				return NewTask("Old name", 3)
+			},
+			editName:     "New name",
+			editEstimate: 0,
+			wantName:     "New name",
+			wantEstimate: 1,
+		},
+		{
+			name: "edit with empty name keeps original name",
+			setup: func() *Task {
+				return NewTask("Old name", 3)
+			},
+			editName:     "",
+			editEstimate: 5,
+			wantName:     "Old name",
+			wantEstimate: 3,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			task := tt.setup()
+			task.Edit(tt.editName, tt.editEstimate)
+
+			if task.Name != tt.wantName {
+				t.Errorf("Name = %q, want %q", task.Name, tt.wantName)
+			}
+			if task.EstimatedPomos != tt.wantEstimate {
+				t.Errorf("EstimatedPomos = %d, want %d", task.EstimatedPomos, tt.wantEstimate)
 			}
 		})
 	}

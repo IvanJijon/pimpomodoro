@@ -26,6 +26,7 @@ const (
 	ModePreviousConfirm
 	ModeTaskList
 	ModeTaskAdd
+	ModeTaskEdit
 	ModeSwitchTaskConfirm
 )
 

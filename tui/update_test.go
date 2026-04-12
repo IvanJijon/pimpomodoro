@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -1308,6 +1309,125 @@ func TestSwitchTaskConfirmDialog(t *testing.T) {
 			}
 			if model.running != tt.wantRunning {
 				t.Errorf("running = %v, want %v", model.running, tt.wantRunning)
+			}
+		})
+	}
+}
+
+func TestTaskEdit(t *testing.T) {
+	tests := []struct {
+		name         string
+		setup        func(*Model)
+		msg          tea.Msg
+		wantViewMode ViewMode
+		wantName     string
+		wantEstimate int
+	}{
+		{
+			name: "pressing e enters edit mode with current values",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskList
+				m.taskList.Add(task.NewTask("Write tests", 3))
+				m.taskCursor = 0
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}},
+			wantViewMode: ModeTaskEdit,
+			wantName:     "Write tests",
+			wantEstimate: 3,
+		},
+		{
+			name: "pressing e on empty list is a no-op",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskList
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'e'}},
+			wantViewMode: ModeTaskList,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := newTestModel()
+			if tt.setup != nil {
+				tt.setup(&m)
+			}
+
+			updated, _ := m.Update(tt.msg)
+			model := updated.(Model)
+
+			if model.viewMode != tt.wantViewMode {
+				t.Errorf("viewMode = %v, want %v", model.viewMode, tt.wantViewMode)
+			}
+			if tt.wantViewMode == ModeTaskEdit {
+				if model.taskNameInput.Value() != tt.wantName {
+					t.Errorf("taskNameInput = %q, want %q", model.taskNameInput.Value(), tt.wantName)
+				}
+				if model.taskEstimateInput.Value() != fmt.Sprintf("%d", tt.wantEstimate) {
+					t.Errorf("taskEstimateInput = %q, want %q", model.taskEstimateInput.Value(), fmt.Sprintf("%d", tt.wantEstimate))
+				}
+			}
+		})
+	}
+}
+
+func TestTaskEditConfirm(t *testing.T) {
+	tests := []struct {
+		name         string
+		setup        func(*Model)
+		msg          tea.Msg
+		wantViewMode ViewMode
+		wantName     string
+		wantEstimate int
+	}{
+		{
+			name: "pressing enter confirms edit",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskEdit
+				m.taskList.Add(task.NewTask("Old name", 3))
+				m.taskCursor = 0
+				m.taskNameInput.SetValue("New name")
+				m.taskEstimateInput.SetValue("5")
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyEnter},
+			wantViewMode: ModeTaskList,
+			wantName:     "New name",
+			wantEstimate: 5,
+		},
+		{
+			name: "pressing esc cancels edit",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskEdit
+				m.taskList.Add(task.NewTask("Old name", 3))
+				m.taskCursor = 0
+				m.taskNameInput.SetValue("New name")
+				m.taskEstimateInput.SetValue("5")
+			},
+			msg:          tea.KeyMsg{Type: tea.KeyEsc},
+			wantViewMode: ModeTaskList,
+			wantName:     "Old name",
+			wantEstimate: 3,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			m := newTestModel()
+			if tt.setup != nil {
+				tt.setup(&m)
+			}
+
+			updated, _ := m.Update(tt.msg)
+			model := updated.(Model)
+
+			if model.viewMode != tt.wantViewMode {
+				t.Errorf("viewMode = %v, want %v", model.viewMode, tt.wantViewMode)
+			}
+			tsk := model.taskList.Tasks()[0]
+			if tsk.Name != tt.wantName {
+				t.Errorf("Name = %q, want %q", tsk.Name, tt.wantName)
+			}
+			if tsk.EstimatedPomos != tt.wantEstimate {
+				t.Errorf("EstimatedPomos = %d, want %d", tsk.EstimatedPomos, tt.wantEstimate)
 			}
 		})
 	}

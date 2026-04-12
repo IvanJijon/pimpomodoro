@@ -60,6 +60,7 @@ pimpom --no-sound --no-notify
 | `↑`/`↓` or `j`/`k` | Navigate tasks |
 | `enter` | Select task as WIP |
 | `a` | Add new task |
+| `e` | Edit task |
 | `d` | Mark task as done |
 | `x` | Remove task |
 
