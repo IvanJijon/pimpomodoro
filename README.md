@@ -48,8 +48,20 @@ pimpom --no-sound --no-notify
 | `r` | Reset current phase |
 | `n` | Skip to next phase |
 | `b` | Go to previous phase |
+| `t` | Toggle task list |
 | `?` | Toggle help |
 | `q` | Quit |
+| `esc` | Go back |
+
+### Task List Keybindings
+
+| Key | Action |
+|-----|--------|
+| `↑`/`↓` or `j`/`k` | Navigate tasks |
+| `enter` | Select task as WIP |
+| `a` | Add new task |
+| `d` | Mark task as done |
+| `x` | Remove task |
 
 
 ## Architecture
