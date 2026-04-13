@@ -25,38 +25,16 @@ func DefaultTheme() Theme {
 }
 
 func LoadFromFile(path string) Theme {
+	theme := DefaultTheme()
+
 	content, err := os.ReadFile(path)
 	if err != nil {
-		return DefaultTheme()
+		return theme
 	}
 
-	var theme Theme
-	err = yaml.Unmarshal(content, &theme)
-	if err != nil {
-		return DefaultTheme()
+	if yaml.Unmarshal(content, &theme) != nil {
+		return theme
 	}
-
-	theme.fillMissingColors()
 
 	return theme
-}
-
-func (th *Theme) fillMissingColors() {
-	defaultTheme := DefaultTheme()
-
-	if th.Work == "" {
-		th.Work = defaultTheme.Work
-	}
-	if th.ShortBreak == "" {
-		th.ShortBreak = defaultTheme.ShortBreak
-	}
-	if th.LongBreak == "" {
-		th.LongBreak = defaultTheme.LongBreak
-	}
-	if th.Paused == "" {
-		th.Paused = defaultTheme.Paused
-	}
-	if th.Subtle == "" {
-		th.Subtle = defaultTheme.Subtle
-	}
 }
