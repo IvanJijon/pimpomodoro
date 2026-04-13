@@ -8,6 +8,10 @@ Since this is a lightweight Pomodoro tool, it is named after the smallest tomato
 
 Command: `pimpom`
 
+<p align="center">
+  <img src="assets/demo.gif" alt="demo" width="800">
+</p>
+
 ## Usage
 
 ```bash
