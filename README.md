@@ -61,9 +61,23 @@ pimpom --no-sound --no-notify
 | `enter` | Select task as WIP |
 | `a` | Add new task |
 | `e` | Edit task |
-| `d` | Mark task as done |
+| `d` | Toggle task done/undone |
 | `x` | Remove task |
 
+
+## Themes
+
+Customize colors by creating `~/.config/pimpom/theme.yaml`. You only need to include the colors you want to change — missing values use defaults.
+
+```yaml
+work: "#E74C3C"
+short-break: "#2AA198"
+paused: "#F39C12"
+```
+
+See [THEMES.md](THEMES.md) for the full reference and examples.
+
+> **Note:** Pimpomodoro inherits your terminal's background color. The theme controls text and accent colors only.
 
 ## Architecture
 

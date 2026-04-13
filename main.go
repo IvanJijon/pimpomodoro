@@ -4,11 +4,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/IvanJijon/pimpomodoro/session"
+	"github.com/IvanJijon/pimpomodoro/theme"
 	"github.com/IvanJijon/pimpomodoro/tui"
 )
 
@@ -50,7 +52,16 @@ func parseAppConfig() tui.AppConfig {
 		cb.SendNotify = func(_, _ string) {}
 	}
 
+	var th theme.Theme
+	home, err := os.UserHomeDir()
+	if err != nil {
+		th = theme.DefaultTheme()
+	} else {
+		th = theme.LoadFromFile(filepath.Join(home, ".config", "pimpom", "theme.yaml"))
+	}
+
 	return tui.AppConfig{
+		Theme: th,
 		Session: session.Config{
 			WorkDuration:       time.Duration(*work) * time.Minute,
 			ShortBreakDuration: time.Duration(*brk) * time.Minute,
