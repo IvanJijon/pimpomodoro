@@ -16,6 +16,7 @@ import (
 
 var (
 	version = "dev"
+	appName = "pimpom"
 
 	work          = flag.Int("work", 25, "work duration in minutes")
 	brk           = flag.Int("break", 5, "short break duration in minutes")
@@ -53,11 +54,11 @@ func parseAppConfig() tui.AppConfig {
 	}
 
 	var th theme.Theme
-	home, err := os.UserHomeDir()
+	cfgDir, err := configPath()
 	if err != nil {
 		th = theme.DefaultTheme()
 	} else {
-		th = theme.LoadFromFile(filepath.Join(home, ".config", "pimpom", "theme.yaml"))
+		th = theme.LoadFromFile(filepath.Join(cfgDir, "theme.yaml"))
 	}
 
 	return tui.AppConfig{
@@ -72,4 +73,13 @@ func parseAppConfig() tui.AppConfig {
 		ConfirmEnabled: !*noConfirm,
 		VisualAlert:    !*noVisualAlert,
 	}
+}
+
+func configPath() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return filepath.Join(home, ".config", appName), nil
 }
