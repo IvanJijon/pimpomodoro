@@ -26,7 +26,6 @@ func DefaultConfig() Config {
 		ShortBreakDuration: 5 * time.Minute,
 		LongBreakDuration:  15 * time.Minute,
 		Rounds:             4,
-		
 	}
 }
 
@@ -38,6 +37,7 @@ func NewSession(cfg Config) Session {
 		LongBreakDuration:  cfg.LongBreakDuration,
 		Rounds:             cfg.Rounds,
 		CurrentPomodoro:    1,
+		CurrentPhase:       Idle,
 	}
 }
 
@@ -73,17 +73,23 @@ func (s *Session) PreviousPhase() {
 		s.CurrentPhase = Work
 	case LongBreak:
 		s.CurrentPhase = Work
+	case Idle:
+		// no-op
 	}
 }
 
 // PhaseDuration returns the duration of the current phase.
 func (s *Session) PhaseDuration() time.Duration {
 	switch s.CurrentPhase {
+	case Work:
+		return s.WorkDuration
 	case ShortBreak:
 		return s.ShortBreakDuration
 	case LongBreak:
 		return s.LongBreakDuration
+	case Idle:
+		return 0
 	default:
-		return s.WorkDuration
+		return 0
 	}
 }
