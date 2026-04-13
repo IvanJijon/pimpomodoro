@@ -142,7 +142,12 @@ func (m Model) handleKeyTaskList(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		if m.taskList.Len() == 0 {
 			return m, nil
 		}
-		m.taskList.MarkTaskDone(m.taskList.Tasks()[m.taskCursor])
+		t := m.taskList.Tasks()[m.taskCursor]
+		if t.Status == task.Done {
+			m.taskList.UnmarkTaskDone(t)
+		} else {
+			m.taskList.MarkTaskDone(t)
+		}
 		return m, nil
 	case "x":
 		if m.taskList.Len() == 0 {

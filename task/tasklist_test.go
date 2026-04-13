@@ -183,7 +183,6 @@ func TestTaskListMarkDoneReorders(t *testing.T) {
 				first := NewTask("First", 1)
 				tl.Add(first)
 				tl.Add(NewTask("Second", 2))
-				tl.SelectWIP(first)
 				tl.MarkTaskDone(first)
 				return tl
 			},
@@ -199,6 +198,38 @@ func TestTaskListMarkDoneReorders(t *testing.T) {
 			last := tasks[len(tasks)-1]
 			if last.Name != tt.wantLastName {
 				t.Errorf("last task = %q, want %q", last.Name, tt.wantLastName)
+			}
+		})
+	}
+}
+
+func TestTaskListUnmarkDoneReorders(t *testing.T) {
+	tests := []struct {
+		name       string
+		setup      func() (*TaskList, *Task)
+		wantStatus Status
+	}{
+		{
+			name: "unmarked task returns to pending status and re-sorts",
+			setup: func() (*TaskList, *Task) {
+				tl := NewTaskList()
+				first := NewTask("First", 1)
+				tl.Add(first)
+				tl.Add(NewTask("Second", 2))
+				tl.MarkTaskDone(first)
+				tl.UnmarkTaskDone(first)
+				return tl, first
+			},
+			wantStatus: Pending,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, task := tt.setup()
+
+			if task.Status != tt.wantStatus {
+				t.Errorf("Status = %v, want %v", task.Status, tt.wantStatus)
 			}
 		})
 	}

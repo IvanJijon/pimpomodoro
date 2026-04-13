@@ -84,6 +84,15 @@ func TestTaskStartWork(t *testing.T) {
 			wantStatus: InProgress,
 		},
 		{
+			name: "done task can be started",
+			setup: func() *Task {
+				task := NewTask("Write tests", 3)
+				task.MarkDone()
+				return task
+			},
+			wantStatus: InProgress,
+		},
+		{
 			name: "starting an in-progress task is a no-op",
 			setup: func() *Task {
 				task := NewTask("Write tests", 3)
@@ -122,12 +131,20 @@ func TestTaskMarkDone(t *testing.T) {
 			wantStatus: Done,
 		},
 		{
-			name: "pending task cannot be marked done",
+			name: "pending task can be marked done",
+			setup: func() *Task {
+				return NewTask("Write tests", 3)
+			},
+			wantStatus: Done,
+		},
+		{
+			name: "marking done an already done task is a no-op",
 			setup: func() *Task {
 				task := NewTask("Write tests", 3)
+				task.MarkDone()
 				return task
 			},
-			wantStatus: Pending,
+			wantStatus: Done,
 		},
 	}
 
@@ -135,6 +152,51 @@ func TestTaskMarkDone(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			task := tt.setup()
 			task.MarkDone()
+
+			if task.Status != tt.wantStatus {
+				t.Errorf("Status = %v, want %v", task.Status, tt.wantStatus)
+			}
+		})
+	}
+}
+
+func TestTaskUnmarkDone(t *testing.T) {
+	tests := []struct {
+		name       string
+		setup      func() *Task
+		wantStatus Status
+	}{
+		{
+			name: "done task can be unmarked to pending",
+			setup: func() *Task {
+				task := NewTask("Write tests", 3)
+				task.MarkDone()
+				return task
+			},
+			wantStatus: Pending,
+		},
+		{
+			name: "unmarking a pending task is a no-op",
+			setup: func() *Task {
+				return NewTask("Write tests", 3)
+			},
+			wantStatus: Pending,
+		},
+		{
+			name: "unmarking an in-progress task is a no-op",
+			setup: func() *Task {
+				task := NewTask("Write tests", 3)
+				task.StartWork()
+				return task
+			},
+			wantStatus: InProgress,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			task := tt.setup()
+			task.UnmarkDone()
 
 			if task.Status != tt.wantStatus {
 				t.Errorf("Status = %v, want %v", task.Status, tt.wantStatus)

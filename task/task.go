@@ -44,9 +44,7 @@ func (t *Task) Edit(name string, estimatedPomos int) *Task {
 }
 
 func (t *Task) StartWork() {
-	if t.Status == Pending {
-		t.Status = InProgress
-	}
+	t.Status = InProgress
 }
 
 func (t *Task) StopWork() {
@@ -56,8 +54,12 @@ func (t *Task) StopWork() {
 }
 
 func (t *Task) MarkDone() {
-	if t.Status == InProgress {
-		t.Status = Done
+	t.Status = Done
+}
+
+func (t *Task) UnmarkDone() {
+	if t.Status == Done {
+		t.Status = Pending
 	}
 }
 

@@ -162,7 +162,7 @@ func TestTaskListMarkDoneFromCursor(t *testing.T) {
 		wantStatus task.Status
 	}{
 		{
-			name: "pressing d marks task at cursor as done",
+			name: "pressing d marks in-progress task at cursor as done",
 			setup: func(m *Model) {
 				m.viewMode = ModeTaskList
 				t1 := task.NewTask("First", 1)
@@ -171,6 +171,27 @@ func TestTaskListMarkDoneFromCursor(t *testing.T) {
 			},
 			msg:        tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'d'}},
 			wantStatus: task.Done,
+		},
+		{
+			name: "pressing d marks pending task at cursor as done",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskList
+				m.taskList.Add(task.NewTask("First", 1))
+			},
+			msg:        tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'d'}},
+			wantStatus: task.Done,
+		},
+		{
+			name: "pressing d on done task unmarks it to pending",
+			setup: func(m *Model) {
+				m.viewMode = ModeTaskList
+				t1 := task.NewTask("First", 1)
+				m.taskList.Add(t1)
+				m.taskList.MarkTaskDone(t1)
+				m.taskCursor = 0
+			},
+			msg:        tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'d'}},
+			wantStatus: task.Pending,
 		},
 		{
 			name: "pressing d on empty list is a no-op",

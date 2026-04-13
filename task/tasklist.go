@@ -77,6 +77,17 @@ func (tl *TaskList) MarkTaskDone(t *Task) {
 	tl.sort()
 }
 
+func (tl *TaskList) UnmarkTaskDone(t *Task) {
+	for _, task := range tl.tasks {
+		if task == t {
+			task.UnmarkDone()
+			break
+		}
+	}
+
+	tl.sort()
+}
+
 // statusPriority defines the order of task statuses for sorting: InProgress first, then Pending, and Done last.
 var statusPriority = map[Status]int{
 	InProgress: 0,
