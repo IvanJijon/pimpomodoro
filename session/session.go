@@ -26,6 +26,7 @@ func DefaultConfig() Config {
 		ShortBreakDuration: 5 * time.Minute,
 		LongBreakDuration:  15 * time.Minute,
 		Rounds:             4,
+		
 	}
 }
 

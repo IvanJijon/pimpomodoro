@@ -12,6 +12,7 @@ import (
 	"github.com/IvanJijon/pimpomodoro/session"
 	"github.com/IvanJijon/pimpomodoro/sound"
 	"github.com/IvanJijon/pimpomodoro/task"
+	"github.com/IvanJijon/pimpomodoro/theme"
 )
 
 // ViewMode represents the current UI mode.
@@ -50,6 +51,7 @@ type AppConfig struct {
 	Callbacks      Callbacks
 	ConfirmEnabled bool
 	VisualAlert    bool
+	Theme          theme.Theme
 }
 
 // Model holds the application state.
@@ -69,6 +71,7 @@ type Model struct {
 	// UI
 	width  int
 	height int
+	theme  theme.Theme
 
 	spinner  spinner.Model
 	viewMode ViewMode
@@ -105,6 +108,11 @@ func NewModel(cfg AppConfig) Model {
 		return ti
 	}
 
+	var zeroTheme theme.Theme
+	if cfg.Theme == zeroTheme {
+		cfg.Theme = theme.DefaultTheme()
+	}
+
 	return Model{
 		session:           session.NewSession(cfg.Session),
 		spinner:           newSpinner(),
@@ -115,6 +123,7 @@ func NewModel(cfg AppConfig) Model {
 		taskCursor:        0,
 		taskNameInput:     taskName(),
 		taskEstimateInput: estimation(),
+		theme:             cfg.Theme,
 	}
 }
 

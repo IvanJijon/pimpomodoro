@@ -29,11 +29,9 @@ var (
 	timerTextStyle = lipgloss.NewStyle().Bold(true)
 
 	pausedStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(yellow)
+			Bold(true)
 
 	footerStyle = lipgloss.NewStyle().
-			Foreground(gray).
 			Width(viewWidth).
 			AlignHorizontal(lipgloss.Center)
 
@@ -62,7 +60,7 @@ func (m Model) View() string {
 		s += "\n" + centerStyle.Render("Task List") + "\n\n"
 		tasks := m.taskList.Tasks()
 		if len(tasks) == 0 {
-			s += centerStyle.Render(footerStyle.Render("No tasks yet")) + "\n"
+			s += centerStyle.Render(themedFooter(m).Render("No tasks yet")) + "\n"
 		} else {
 			var list string
 			for i, t := range tasks {
@@ -74,8 +72,8 @@ func (m Model) View() string {
 			}
 			s += lipgloss.NewStyle().Width(viewWidth).Render(list)
 		}
-		s += "\n" + footerStyle.Render("(a) add  (e) edit  (enter) select  (d) done") + "\n"
-		s += footerStyle.Render("(x) remove  (esc) back") + "\n"
+		s += "\n" + themedFooter(m).Render("(a) add  (e) edit  (enter) select  (d) done") + "\n"
+		s += themedFooter(m).Render("(x) remove  (esc) back") + "\n"
 	} else if m.viewMode == ModeSwitchTaskConfirm {
 		s += "\n" + centerStyle.Render("Task List") + "\n\n"
 		dialog := dialogStyle.Render("Timer will be reset, switch task?\n\n(y) confirm  (n) cancel")
@@ -89,14 +87,14 @@ func (m Model) View() string {
 		form := "  Name:     " + m.taskNameInput.View() + "\n"
 		form += "  Estimate: " + m.taskEstimateInput.View() + "\n"
 		s += lipgloss.NewStyle().Width(viewWidth).Render(form)
-		s += "\n" + footerStyle.Render("(enter) confirm  (tab) next  (esc) cancel") + "\n"
+		s += "\n" + themedFooter(m).Render("(enter) confirm  (tab) next  (esc) cancel") + "\n"
 	} else {
 		s += "\n" + centerStyle.Render(phaseLabel(m)) + "\n"
 		switch {
 		case m.running:
 			s += "\n" + centerStyle.Render(strings.TrimRight(m.spinner.View(), " ")+phaseTimerStyle(m).Render(formatDuration(m.remainingTime))) + "\n"
 		case m.session.CurrentPhase != session.Idle:
-			s += "\n" + centerStyle.Render(pausedStyle.Render("\u23f8 "+formatDuration(m.remainingTime))) + "\n"
+			s += "\n" + centerStyle.Render(themedPaused(m).Render("\u23f8 "+formatDuration(m.remainingTime))) + "\n"
 		default:
 			s += "\n" + centerStyle.Render(timerTextStyle.Render(formatDuration(m.remainingTime))) + "\n"
 		}
@@ -119,11 +117,11 @@ func (m Model) View() string {
 			dialog := dialogStyle.Render("Go to previous phase?\n\n(y) confirm  (n) cancel")
 			s += "\n" + centerStyle.Render(dialog) + "\n"
 		case ModeNormal:
-			s += "\n" + footerStyle.Render(configSummary(m)) + "\n"
-			s += footerStyle.Render("(?) help  (t) tasks  (q) quit") + "\n"
+			s += "\n" + themedFooter(m).Render(configSummary(m)) + "\n"
+			s += themedFooter(m).Render("(?) help  (t) tasks  (q) quit") + "\n"
 		default:
-			s += "\n" + footerStyle.Render(configSummary(m)) + "\n"
-			s += footerStyle.Render("(?) help  (t) tasks  (q) quit") + "\n"
+			s += "\n" + themedFooter(m).Render(configSummary(m)) + "\n"
+			s += themedFooter(m).Render("(?) help  (t) tasks  (q) quit") + "\n"
 		}
 	}
 
@@ -173,20 +171,28 @@ func phaseLabel(m Model) string {
 func phaseColor(m Model) lipgloss.Color {
 	switch m.session.CurrentPhase {
 	case session.Work:
-		return bordeaux
+		return lipgloss.Color(m.theme.Work)
 	case session.LongBreak:
-		return deepBlue
+		return lipgloss.Color(m.theme.LongBreak)
 	case session.ShortBreak:
-		return turquoise
+		return lipgloss.Color(m.theme.ShortBreak)
 	case session.Idle:
-		return gray
+		return lipgloss.Color(m.theme.Subtle)
 	default:
-		return gray
+		return lipgloss.Color(m.theme.Subtle)
 	}
 }
 
 func phaseTimerStyle(m Model) lipgloss.Style {
 	return timerTextStyle.Foreground(phaseColor(m))
+}
+
+func themedFooter(m Model) lipgloss.Style {
+	return footerStyle.Foreground(lipgloss.Color(m.theme.Subtle))
+}
+
+func themedPaused(m Model) lipgloss.Style {
+	return pausedStyle.Foreground(lipgloss.Color(m.theme.Paused))
 }
 
 func wipLabel(wip *task.Task) string {
